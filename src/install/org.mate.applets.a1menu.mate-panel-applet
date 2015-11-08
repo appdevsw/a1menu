@@ -1,0 +1,10 @@
+[Applet Factory]
+Id=A1Menu
+Location=/usr/lib/mate-applets/a1menu.run
+Name=a1menu Factory
+Description=a1menu Factory
+
+[A1Menu_AppletID]
+Name=a1menu
+Description=Searchable menu for MATE Desktop
+Icon=terminal
