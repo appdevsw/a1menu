@@ -1,12 +1,12 @@
 a1menu License.
 
 Binaries (compiled application, deb packages, etc) are freeware. 
-You can use, distribute, and sell them without resctrictions. 
+You can use, distribute, and sell them without restrictions. 
 
-Source code is non-free.
-You can read code and compile it.
-You can also modify the code for personal use, but you cannot distibute or publish the modified version of the code.
+The source code is non-free.
+You can read the source code and compile it.
+You can also modify the source code for personal use, but you cannot distibute or publish the modified version of the source code.
 You can treat binaries created from the modified source as a freeware.
-These restrictions will be in force until I correct errors.
-Then I plan to release a1menu under the open-source license.
+
+These restrictions will be in force until I correct errors, then I plan to release a1menu under the open-source license.
 
