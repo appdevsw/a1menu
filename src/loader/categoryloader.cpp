@@ -387,6 +387,14 @@ void CategoryLoader::loadCategoryDirFiles()
 		cdirs.push_back("/var/lib/menu-xdg/desktop-directories/menu-xdg/");
 		cdirs.push_back("/usr/share/desktop-directories/");
 
+		vector<QString> adddirs;
+		CFGPTR()->split("category_additional_files", adddirs);
+		for (QString apath : adddirs)
+		{
+			cdirs.push_back(apath);
+		}
+
+
 		for (auto dir : cdirs)
 		{
 			toolkit.getDirectory(dir, &vdir);

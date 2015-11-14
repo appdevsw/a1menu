@@ -1,7 +1,9 @@
 #!/bin/bash
 
-exepath=/D/c++/qtworkspace/Applet/Debug
-srcpath=/D/c++/qtworkspace/Applet/qt-lnk/a1menu
+appletbase="/D/c++/qtworkspace/Applet"
+
+exepath=$appletbase/Debug
+srcpath=$appletbase/qt-lnk/a1menu
 
 resname=a1menu.res.gz
 respath=/tmp/$resname
@@ -14,15 +16,15 @@ xxd -i  $respath > $hheader
 h2=$(md5sum $hheader)
 
 
-echo $h1
-echo $h2
+#echo $h1
+#echo $h2
 
 if [ "$h1" != "$h2" ] ; then
 
   echo "$src was changed. Rebuild required."
 
-  objpath="/D/c++/qtworkspace/Applet/Debug/qt-lnk/a1menu/"
-  exepath="/D/c++/qtworkspace/Applet/Debug/"
+  objpath="$appletbase/Debug/qt-lnk/a1menu/"
+  exepath="$appletbase/Debug/"
   
   frun="$exepath/a1menu.run"
   touch $frun

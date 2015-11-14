@@ -24,21 +24,6 @@ void SearchBox::paintEvent(QPaintEvent * event)
 void SearchBox::setIcons(QString isearch, QString iclear,int isize)
 {
 	this->isize = isize;
-
-	/*
-	auto e=new UserEvent(UserEventType::SET_ICON);
-	e->custom.icon.path=isearch;
-	e->custom.icon.pix=&pixsearch;
-	e->custom.icon.size=isize;
-	e->postLater(0);
-
-	e=new UserEvent(UserEventType::SET_ICON);
-	e->custom.icon.path=iclear;
-	e->custom.icon.pix=&pixclear;
-	e->custom.icon.size=isize;
-	e->postLater(0);
-	*/
-
 	pixsearch = QIcon(isearch).pixmap(isize, isize);
 	pixclear = QIcon(iclear).pixmap(isize, isize);
 	auto m = textMargins();
@@ -67,10 +52,7 @@ bool SearchBox::event(QEvent * event)
 {
 	QString txt = this->text();
 	if (prevText != txt)
-	{
 		prevText = txt;
-		//qDebug("text %s", QS(txt));
-	}
 	if (callback != NULL)
 		callback->onSearchBoxCallback(this,event,txt);
 	return QWidget::event(event);

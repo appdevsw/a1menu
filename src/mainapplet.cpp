@@ -137,49 +137,29 @@ static gboolean memu_applet_init(MatePanelApplet * applet)
 	app->hboxi = gtk_hbox_new(FALSE, 0);
 	app->container = gtk_event_box_new();
 
-
-	/*
-	//GtkStyle *style = gtk_widget_get_style(GTK_WIDGET(applet)); //app->container);
-	GtkStyle *style = gtk_widget_get_style(GTK_WIDGET(app->container));
-
-	//app->hicolor = style->bg[GTK_STATE_PRELIGHT];
-	//gtk_widget_modify_bg(app->container, GTK_STATE_PRELIGHT, &(app->hicolor));
-
-	app->locolor = style->bg[GTK_STATE_NORMAL];
-	app->hicolor = style->bg[GTK_STATE_PRELIGHT];
-	gtk_widget_modify_bg(app->container, GTK_STATE_NORMAL, &(app->locolor));
-	highlight(app->hicolor);
-	gtk_widget_modify_bg(app->container, GTK_STATE_PRELIGHT, &(app->hicolor));
-	*/
-
 	g_signal_connect(G_OBJECT (app->container), "button_press_event", G_CALLBACK (callback_handler_button_press), NULL);
 	g_signal_connect(G_OBJECT (app->container), "enter-notify-event", G_CALLBACK (callback_handler_highlight), &(app->statehi));
 	g_signal_connect(G_OBJECT (app->container), "leave-notify-event", G_CALLBACK (callback_handler_highlight), &(app->statelo));
-
 	g_signal_connect(G_OBJECT (applet), "destroy", G_CALLBACK (menu_applet_destroy), app);
 
-	//char lab[255];
-	//sprintf(lab, "Menu %lld", ctx::clockmicro());
-	//app->label = gtk_label_new(lab);
 	if (maindt.instcount <= 1)
 		app->label = gtk_label_new("Menu");
 	else
 		app->label = gtk_label_new("menu is a single-instance applet");
-	//app->icon = gtk_image_new_from_file("system-run");
-	//gtk_box_pack_start(GTK_BOX(app->hboxi), app->icon, 0, 0, 0);
+
 	gtk_box_pack_start(GTK_BOX(app->hbox), app->hboxi, 0, 0, 2);
 	gtk_box_pack_start(GTK_BOX(app->hbox), app->label, 0, 0, 2);
-
 	gtk_container_add(GTK_CONTAINER(app->container), app->hbox);
 	gtk_container_add(GTK_CONTAINER(applet), (GtkWidget*) app->container);
+
 	gtk_widget_show_all((GtkWidget*) applet);
 	ctx::thread_data.isGtkInitialized = 1;
+
 	return TRUE;
 }
 
 static gboolean a1menu_factory(MatePanelApplet * applet, const char* iid, gpointer data)
 {
-	//printf("\na1menu_factory!!!!! <%s>\n", iid);
 	gboolean retval = FALSE;
 	if (!g_strcmp0(iid, A1MENU_APPLET_NAME))
 	{
@@ -204,7 +184,8 @@ void setMainArguments(int argc, char ** argv, MainWindow * wnd)
 MATE_PANEL_APPLET_OUT_PROCESS_FACTORY(A1MENU_APPLET_FACTORY, PANEL_TYPE_APPLET, A1MENU_APPLET_DESC, a1menu_factory, NULL)
 #undef main
 
-/*
+/* content of the MATE_PANEL_APPLET_OUT_PROCESS_FACTORY macro
+ *
  int applet_main(int argc, char* argv[])
  {
  GOptionContext* context;

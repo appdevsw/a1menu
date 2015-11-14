@@ -19,7 +19,6 @@ fi
 
 
 if [ "$arch" == "amd64" ] ; then
-   echo "Warning: installing amd64 debug version"
    exedirinst="$exebase/Release/"
 else
    exedirinst="$exebase/Release32/"

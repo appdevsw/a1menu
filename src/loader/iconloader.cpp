@@ -304,6 +304,7 @@ void IconLoader::fillIndex(const QString& pipath)
 		QString childPath = ipath % fname;
 		if (ent->d_type == DT_DIR)
 		{
+			//qDebug(QS(childPath));
 			parseIconPath(childPath, rec);
 			//if (rec.size <= 0 || (rec.size > 0 && vsizesset.find(rec.size) != vsizesset.end()))
 			if (rec.theme == "" || vthemesmap.find(rec.theme) != vthemesmap.end())

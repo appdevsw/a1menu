@@ -160,6 +160,8 @@ void Config::setDefaultConfig(ConfigMap& cmap)
 	newItem(c, "desktop_additional_paths", CHR, ";", tr("Additional paths for .desktop files"), "", false, true);
 	newItem(c, "category_additional_files", CHR, ";", tr("Additional paths for .directory files"), "", false, true);
 	newItem(c, "icons_additional_paths", CHR, ";", tr("Additional paths for icons"), "", false, true);
+	newItem(c, "include", CHR, ";", tr("Include config files"));
+	newItem(c, "css_file",CHR, QFileInfo(PATH(CSS_DEFAULT)).fileName(), tr("Style sheet file"));
 
 	c = newItem(root, tr("Icons"));
 
@@ -194,8 +196,6 @@ void Config::setDefaultConfig(ConfigMap& cmap)
 	c = newItem(root, "@" + tr("Menu"));
 
 	newItem(c, "menu_sync_delay_ms", INT, "200", tr("Menu synchronization delay [ms]"), "0:3000");
-	newItem(c, "include", CHR, ";", tr("Include config files"));
-	newItem(c, "css_file", CHR, PATH(CSS_DEFAULT), tr("Style sheet file"));
 	newItem(c, "menu_label", CHR, "Menu", tr("Menu label on the panel"), "", false, true);
 	newItem(c, "hotkey", CHR, "", tr("Hot key"), "hotkey");
 

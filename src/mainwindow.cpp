@@ -144,9 +144,6 @@ void MainWindow::hideEvent(QHideEvent * event)
 
 void MainWindow::moveOrResize(QEvent * event)
 {
-	int xmargin = 10;
-	int minw = 50;
-	int maxw = 2000;
 
 	int tp = event->type();
 	if (tp == QEvent::Leave)
@@ -155,44 +152,67 @@ void MainWindow::moveOrResize(QEvent * event)
 	if (tp != QEvent::MouseButtonPress && tp != QEvent::MouseMove && tp != QEvent::MouseButtonRelease)
 		return;
 	QMouseEvent * me = (QMouseEvent *) event;
-	int lbutton = (me->buttons() & Qt::LeftButton);
 
-	int mx = me->pos().x();
-	int sx = this->width();
-	int hl = mx < xmargin;
-	int hr = mx > sx - xmargin;
+	int xmargin = 10;
+	int minw = 50;
+	int maxw = 2000;
 
-	int resize = (hl || hr);
-	int move = !resize;
+	int pmx = QCursor::pos().x();
+	int pmy = QCursor::pos().y();
+	int lt = 0;
+	int lb = 0;
+	int rt = 0;
+	int rb = 0;
+	int move = 0;
+	int x1 = pos().x();
+	int x2 = pos().x() + size().width();
+	int y1 = pos().y();
+	int y2 = pos().y() + size().height();
+
+#define inside(px1,px2,py1,py2) (pmx>=px1 && pmx<=px2 && pmy>=py1 && pmy<=py2)
+
+	if (inside(x1, x1 + xmargin, y1, y1 + xmargin))
+		lt = 1;
+	if (inside(x1, x1 + xmargin, y2 - xmargin, y2))
+		lb = 1;
+	if (inside(x2 - xmargin, x2 + xmargin, y1, y1 + xmargin))
+		rt = 1;
+	if (inside(x2 - xmargin, x2 + xmargin, y2 - xmargin, y2))
+		rb = 1;
+
+	if (inside(x1 + xmargin + 1, x2 - xmargin - 1, y1, y1 + xmargin))
+		move = 1;
+	int resize = lt || lb || rt || rb;
 
 	if (tp == QEvent::MouseButtonPress)
 	{
 		drag.pos = me->pos();
 		drag.glbpos = QCursor::pos();
-		drag.wpos = this->pos();
-		drag.size = this->size();
+		drag.rect = this->geometry();
 		drag.move = move;
 		drag.resize = resize;
-		drag.left = hl;
+		drag.lt = lt;
+		drag.lb = lb;
+		drag.rt = rt;
+		drag.rb = rb;
 	}
 
 	if (tp == QEvent::MouseButtonRelease)
 	{
 		setCursor(Qt::ArrowCursor);
+		if (drag.resize)
+		{
+			ctx::catList->reorder(Item::Order::BY_TEXT);
+			ctx::catList->uiList()->setCurrentRow(0);
+			ctx::appList->refreshList("");
+		}
 		drag.move = drag.resize = 0;
-
-		ctx::catList->reorder(Item::Order::BY_TEXT);
-		ctx::catList->uiList()->setCurrentRow(0);
-		ctx::appList->refreshList("");
-
 		saveState();
 	}
 
-//qDebug("move %i resize %i obj size %i %i",drag.move,drag.resize,sx,sy);
-
 	if (resize || drag.resize)
 	{
-		if (hl)
+		if (lt || rb)
 			setCursor(Qt::SizeFDiagCursor);
 		else
 			setCursor(Qt::SizeBDiagCursor);
@@ -201,24 +221,41 @@ void MainWindow::moveOrResize(QEvent * event)
 	else if (drag.move + drag.resize == 0)
 		setCursor(Qt::ArrowCursor);
 
-	if (tp == QEvent::MouseMove && lbutton)
+	if (tp == QEvent::MouseMove && (me->buttons() & Qt::LeftButton))
 	{
 		if (drag.resize)
 		{
+
 			QPoint diff = QCursor::pos() - drag.glbpos;
-			int yup = drag.pos.y() < drag.size.height() / 2;
-			QSize s = drag.size;
-			int newx = s.width() + (drag.left ? -1 : 1) * diff.x();
-			int newy = s.height() + (yup ? -1 : 1) * diff.y();
-			if (newx < minw || newx > maxw)
-				return;
-			if (newy < minw || newy > maxw)
+			int x1 = drag.rect.left();
+			int x2 = drag.rect.right();
+			int y1 = drag.rect.top();
+			int y2 = drag.rect.bottom();
+
+			int xx1 = x1;
+			int xx2 = x2;
+			int yy1 = y1;
+			int yy2 = y2;
+
+			if (drag.lt || drag.lb)
+				xx1 += diff.x();
+			else
+				xx2 += diff.x();
+
+			int wx = xx2 - xx1;
+			if (wx < minw || wx > maxw)
 				return;
 
-			int px = drag.wpos.x() + (drag.left ? 1 : 0) * diff.x();
-			int py = drag.wpos.y() + (yup ? 1 : 0) * diff.y();
-			//qDebug("resize %i %i px/py %i %i",diff.x(),diff.y(),px,py);
-			this->setGeometry(px, py, newx, newy);
+			if (drag.lt || drag.rt)
+				yy1 += diff.y();
+			else
+				yy2 += diff.y();
+
+			int wy = yy2 - yy1;
+			if (wy < minw || wy > maxw)
+				return;
+
+			this->setGeometry(xx1, yy1, xx2 - xx1, yy2 - yy1);
 		}
 
 		if (drag.move)
@@ -371,7 +408,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 		}
 	}
 
-	if (obj == this->ui->frameTopBar)
+	if (obj == this->ui->frame || obj == this->ui->frameTopBar || obj == this->ui->frameTool)
 	{
 		moveOrResize(event);
 	}
@@ -404,10 +441,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 		Toolkit toolkit;
 		vector<QString> filter;
 
-		if(tp==UserEventType::BTN_RELOAD)
+		if (tp == UserEventType::BTN_RELOAD)
 		{
-			tp=UserEventType::IPC_RELOAD;
-			ue->custom.clearCache=true;
+			tp = UserEventType::IPC_RELOAD;
+			ue->custom.clearCache = true;
 		}
 
 		switch (tp)
@@ -812,7 +849,6 @@ void MainWindow::populate()
 	ctx::buttonReload->setUserEvent(UserEventType::BTN_RELOAD);
 	ctx::buttonReload->setToolTip(tr("Reload menu"));
 	ctx::buttonReload->hide();
-
 
 	panelbt.label = CFG("menu_label");
 	if (panelbt.label == "" && panelbt.iconPath == "")

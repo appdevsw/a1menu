@@ -35,7 +35,7 @@ int Resource::writeHeader(gzFile fzout, QString orgFileName, QString zipFileName
 
 	QByteArray header = QString().sprintf("%s%c%i%c", QS(zipFileName), sep, size, sep).toLocal8Bit();
 	int count = gzwrite(fzout, header.data(), header.length());
-	qDebug("writeHeader count <%s> %i %i\n", header.data(), header.length(), count);
+	//qDebug("writeHeader <%s> %i %i\n", header.data(), header.length(), count);
 	return count == header.length() ? 0 : -1;
 }
 

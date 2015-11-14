@@ -63,7 +63,7 @@
        </size>
       </property>
       <property name="frameShape">
-       <enum>QFrame::Panel</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
@@ -240,7 +240,13 @@
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>34</height>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>30</height>
                  </size>
                 </property>
                 <property name="frameShape">
@@ -275,6 +281,12 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -342,13 +354,13 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>46</height>
+           <height>42</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>220</width>
-           <height>46</height>
+           <height>42</height>
           </size>
          </property>
          <property name="layoutDirection">
@@ -361,6 +373,21 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>16</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="ToolButton" name="buttonShutdown">
             <property name="sizePolicy">

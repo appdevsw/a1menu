@@ -72,16 +72,23 @@ private:
 		int serial = 0;
 	} sel;
 
-	struct mouse_drag_data_t
+	struct mouse_drag_data
 	{
 		QPoint pos;
 		QPoint glbpos;
-		QPoint wpos;
-		QSize size;
+		//QPoint wpos;
+		//QSize size;
+		QRect rect;
 		int move = 0;
 		int resize = 0;
-		int left = 0;
+		//int left = 0;
 		int splitterPos = -1;
+
+		int lt = 0;
+		int lb = 0;
+		int rt = 0;
+		int rb = 0;
+
 	} drag;
 
 	struct control_button_t
