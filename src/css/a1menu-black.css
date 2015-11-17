@@ -1,0 +1,285 @@
+
+#define SEL1 rgb(42,32,32)
+#define SEL2 rgb(64,64,64)
+#define SEL_GRADIENT qlineargradient(x1: 0, y1: 0,   x2: 0, y2: 1, stop: 0 SEL1 ,stop: 0.3 SEL2 ,stop: 0.7 SEL2 ,stop: 1 SEL1 );
+
+#define HI1 SEL1
+#define HI2 SEL2
+
+/* Transparent menu
+#define WND_BACKGROUND  rgba(225,225,225 ,80%)
+#define MAIN_BACKGROUND rgba(225,225,225 ,0%)
+#define CAT_BACKGROUND  rgba(215,215,215 ,0%)
+*/
+
+#define WND_BACKGROUND  rgb(42,42,42)
+#define MAIN_BACKGROUND rgb(42,42,42)
+#define CAT_BACKGROUND  rgb(52,52,52)
+
+#define APP_BACKGROUND  MAIN_BACKGROUND
+
+#define SELECTION_BORDER_COLOR rgb(30,80,110)
+
+#define TOOLTIP_BACKGROUND rgb(255,255,225)
+
+/*
+QWidget{
+    font-size: 15px;
+}
+*/
+
+QWidget{
+    color: rgb(220,220,220);
+}
+
+
+/* Main window --------------------------- */
+
+QWidget#WINDOW_WIDGET {
+   background-color: WND_BACKGROUND ;
+   border:1px solid rgb(80,80,80);
+}
+
+
+/* List of categories --------------------------- */
+
+QListWidget#CAT_LIST {
+  background-color: CAT_BACKGROUND ;
+  padding:3px;
+  outline:0;
+}
+
+QFrame#CAT_LIST_FRAME{
+  /*border:1px outset black ;*/
+}
+
+/* List of applications ---------------------------  */
+
+QListWidget#APP_LIST {
+  background-color: APP_BACKGROUND ;
+  border:0px;
+  outline:0;
+}
+
+QFrame#APP_LIST_FRAME{
+  border:0px;
+}
+
+
+
+/* Selected application item  ---------------------------  */
+
+QFrame#APP_LIST::item:selected { 
+      border: 1px solid SELECTION_BORDER_COLOR;
+      border-radius: 2px;
+      background-color: SEL_GRADIENT;
+}
+
+/* Selected category item  ---------------------------  */
+
+QFrame#CAT_LIST::item:selected, QFrame#CAT_LIST::item:focus{ 
+      border: 1px solid SELECTION_BORDER_COLOR;	
+      border-radius: 2px;
+      background-color: SEL_GRADIENT;
+}
+
+/* Highlighted category item  --------------------------- */
+
+QFrame#CAT_LIST::item:!selected:hover { 
+      border: 1px solid SELECTION_BORDER_COLOR;
+      border-radius: 2px;	
+      background-color:qlineargradient(x1: 0, y1: 0,   x2: 0, y2: 1, 
+		  stop: 0   HI1 , 
+		  stop: 0.3 HI2 ,
+		  stop: 0.7 HI2 ,
+		  stop: 1   HI1
+		);
+}
+
+
+/* Items - normal state  --------------------------- */
+
+
+/*
+QFrame#CAT_LIST::item:!selected:!hover { 
+   background-color:  MAIN_BACKGROUND ;
+   border: none;
+}
+
+
+QFrame#APP_LIST::item:!selected:!hover { 
+   background-color:  MAIN_BACKGROUND ;
+   border: none;
+      padding-right:3px;
+}
+*/
+
+
+/* Separator  --------------------------- */
+
+QFrame#SEPARATOR { 
+      border-top: 1px dotted gray;
+      margin-top: 5px;
+}
+
+
+
+/* Search box  --------------------------- */
+
+QFrame#SEARCHBOX {
+  border: 0px solid;
+}
+
+QFrame#SEARCHBOX_FRAME {
+  border: 0px solid gray
+}
+
+QLineEdit {
+  border: 2px solid lightblue;
+  border-radius: 4px;	
+  background-color: rgb(100,100,100);
+  font-weight: bold;
+}
+
+
+
+/* Splitter bar  --------------------------- */
+
+QSplitter::handle{
+   background-color:  MAIN_BACKGROUND ;
+}
+
+
+/* Tool button  --------------------------- */
+
+QFrame#TOOLBAR QPushButton {
+  border: 1px solid rgb(100,100,100)
+}
+
+QFrame#TOOLBAR QPushButton:hover {
+  background-color: white;
+}
+
+
+/* Top bar (using for move and resize)  ---------------------------  */
+
+QFrame#TOP_BAR
+{
+  border:0px;
+}
+
+
+/* Toolbar  --------------------------- */
+
+/*
+QFrame#TOOLBAR
+{
+  border:1px solid lightgray;
+  background: lightgray;
+}
+*/
+
+/* Application tooltip  --------------------------- */
+
+QFrame#APP_LIST::item:selected QToolTip {
+  color: black;
+  background-color: TOOLTIP_BACKGROUND ;
+  border: 1px solid gray;
+}
+
+QFrame#CAT_LIST::item:selected QToolTip {
+  color: black;
+  background-color: TOOLTIP_BACKGROUND ;
+  border: 1px solid gray;
+}
+
+/* Tool button tooltip  --------------------------- */
+
+QFrame#TOOLBAR QPushButton QToolTip {
+  color: black;
+  background-color: TOOLTIP_BACKGROUND ;
+  border: 1px solid gray;
+}
+
+/* Item text : title and comment  --------------------------- */
+
+QLabel#APP_ITEM_TITLE {
+  font-weight: bold;
+}
+
+QLabel#APP_ITEM_COMMENT {
+   font-style: italic;
+   /*font-size: 15px;*/
+}
+
+
+
+/*
+QLabel#PLACE_ITEM_TITLE {
+  font-style: normaborder: 3em solid red;l;
+}
+
+QLabel#CAT_ITEM_TITLE {
+}
+*/
+
+/* Scrollbar - modified example from Qt website http://doc.qt.io/qt-4.8/stylesheet-examples.html */
+
+
+#define SCWIDTH   18px
+/* visible scrollbar width = SCWIDTH - SMARGIN */
+
+/* SMARGIN: margin separating items from the scrollbar */
+#define SMARGIN    4px
+
+#define SARROW_BORDER   1px
+
+/* SARROW_WIDTH must be equal to SCWIDTH - SMARGIN - 2*SARROW_BORDER */
+#define SARROW_WIDTH    12px
+
+#define BORDER_COLOR rgb(120,120,120)
+#define BK_COLOR rgb(100,100,100)
+
+QScrollBar:vertical {
+     border: 1px solid BORDER_COLOR ;
+     border-top:none;
+     border-bottom:none;
+     background: MAIN_BACKGROUND;
+     width: SCWIDTH;
+     margin-top:22px;
+     margin-bottom:22px;
+     margin-left: SMARGIN;
+     padding: 0px;
+ }
+ QScrollBar::handle:vertical {
+     background: BK_COLOR;
+     min-height: 20px;
+ }
+ QScrollBar::add-line:vertical {
+     border: SARROW_BORDER solid BORDER_COLOR;
+     background: BK_COLOR;
+     height: 20px;
+     width: SARROW_WIDTH;
+     margin-left: SMARGIN;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+ }
+
+ QScrollBar::sub-line:vertical {
+     border: SARROW_BORDER solid BORDER_COLOR;
+     background: BK_COLOR;
+     height: 20px;
+     width: SARROW_WIDTH;
+     margin-left: SMARGIN;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+ }
+ QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+     border: 0px solid grey;
+     width: 4px;
+     height: 6px;
+     background: white;
+ }
+ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }
