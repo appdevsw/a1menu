@@ -1,13 +1,4 @@
 # a1menu
 A menu for the MATE Desktop
 
-![menu1](https://raw.github.com/appdevsw/a1menu/ctrl/menu1.png)
-![menu2](https://raw.github.com/appdevsw/a1menu/ctrl/menu2.png)
-![menu3](https://raw.github.com/appdevsw/a1menu/ctrl/menu3.png)
-![menu4](https://raw.github.com/appdevsw/a1menu/ctrl/menu4.png)
-
-Openbox with tint2
-
-![menu5](https://raw.github.com/appdevsw/a1menu/ctrl/menu5.png)
-![bunsenlabs](https://raw.github.com/appdevsw/a1menu/ctrl/bunsenlabs2.png)
-
+![menu1](https://raw.github.com/appdevsw/a1menu/ctrl/a1menu-gtk-screenshot1.png)
