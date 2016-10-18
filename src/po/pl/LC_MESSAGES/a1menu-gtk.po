@@ -2,15 +2,14 @@
 # Polskie t³umaczenia dla pakietu a.
 # Copyright (C) 2016 THE a'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the a package.
-# wlstr <wlstr@fedora>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: a 1menu-gtk-src\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-18 14:48+0200\n"
+"POT-Creation-Date: 2016-10-18 18:04+0200\n"
 "PO-Revision-Date: 2016-10-18 14:51+0200\n"
-"Last-Translator: wlstr <wlstr@fedora>\n"
+"Last-Translator: none\n"
 "Language-Team: Polish\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
