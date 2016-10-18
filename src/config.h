@@ -1,69 +1,48 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <QDialog>
-#include <QFormLayout>
-#include <QListWidget>
 #include "configmap.h"
-#include "parameterform.h"
-#include <QLineEdit>
-#include <QComboBox>
+#include "application.h"
 #include <vector>
-#include <QTranslator>
-#include <QCoreApplication>
-#include <QFileSystemWatcher>
 
-namespace Ui
-{
-class Config;
-}
+using std::string;
 
 struct ConfigItem
 {
-	int id;
-	int parentid;
-	int type = 0;
-	bool mandatory = false;
-	QString name;
-	QString value;
-	QString labelorg;
-	QString label;
-	std::vector<QString> validitems;
-	QString rangeMin = 0;
-	QString rangeMax = 0;
-	bool reloadreq = false;
-	bool isCategory = false;
-	bool hotkey = false;
-	int ord = 100;
+    int id;
+    ConfigItem * parent=NULL;
+    int type = 0;
+    bool mandatory = false;
+    string name;
+    string value;
+    string labelorg;
+    string label;
+    std::vector<string> validItems;
+    string rangeMin ;
+    string rangeMax ;
+    bool isCategory = false;
+    bool hotkey = false;
+    int ord = 100;
+    bool hidden=false;
+    int buttonId=0;
 };
 
 class Config
 {
-Q_DECLARE_TR_FUNCTIONS(Config)
 public:
-	explicit Config();
-	virtual ~Config();
-	void setDefaultConfig(ConfigMap& cmap);
-
-	static int runDialogProcess();
-	static int runDialogProcessProc(int iofd);
-
-	static void inheritIncludes(ConfigMap& cfgorg, ConfigMap& cfg);
-	//bool parameterFormCallback(ParameterForm * pf,int buttonCode);
-	static QString getDesktopPath();
-	static void initTranslation();
-	static QString getVTrans(QString txt, int reverse = 0);
-	static QString getStyleFile();
-	static void installDefaultFiles();
-	vector<ConfigItem *> * items();
-
+    explicit Config();
+    virtual ~Config();
+    void setDefaultConfig();
+    vector<ConfigItem *> * items();
+    ConfigMap & mapref();
+    void load();
+    void save();
 private:
+    ConfigMap cmap;
+    vector<ConfigItem *> vitems;
 
-	static std::map<QString, QString> vtrans;
-	vector<ConfigItem *> vitems;
-
-	int newItem(int parentid, QString name, int type = 0, QString value = "", QString label = "", QString lov = "", //
-			bool mandatory = false, bool reload = false);
+    ConfigItem * newItem(ConfigItem * parentid, string name, int type = 0, string value = "", string label = "", string lov = "", //
+            bool mandatory = false);
 
 };
 

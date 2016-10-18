@@ -1,29 +1,27 @@
 #include "toolkit.h"
-#include "ctx.h"
+#include "sutl.h"
 #include <string>
 #include <cstring>
 #include <algorithm>
 #include <dirent.h>
-#include <QWidget>
-#include <QIODevice>
-#include <QFile>
-#include <QTextStream>
-#include <QDirIterator>
-#include <QDir>
-#include <QFileInfoList>
-#include <QFileInfo>
-#include <QProcess>
 #include <unistd.h>
-#include <QCryptographicHash>
-#include <QDir>
-#include <QMutex>
+#include <stdio.h>
+#include <string.h>
+#include <sstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <pwd.h>
+#include <fstream>
+#include <unistd.h>
 #include <sys/time.h>
-#include <ctype.h>
 #include <assert.h>
-#include <set>
+#include "md5.h"
+//#include <openssl/md5.h>
+//#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+//#include <cryptopp/md5.h>
 
 using namespace std;
-using namespace ctx;
 
 Toolkit::Toolkit()
 {
@@ -33,206 +31,191 @@ Toolkit::~Toolkit()
 {
 }
 
-void Toolkit::tokenize(QString buf, vector<QString>& arr, QString delim)
+int Toolkit::getDirectory(const string& dirName, vector<string> * arr, const string& ext)
 {
-	QString word;
-	if (delim == "")
-		for (int i = 0; i <= 32; i++)
-			delim.append((char) i);
-	buf += delim.left(1);
-	for (int i = 0; i < buf.length(); i++)
-	{
-		QString c = buf.mid(i, 1);
-		if (delim.contains(c))
-		{
-			if (word.length() > 0)
-			{
-				//qDebug("\nToken %s", word.toStdString().c_str());
-				arr.push_back(word);
-			}
-			word = "";
-		} else
-		{
-			word += c;
-		}
-	}
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir(dirName.c_str())) != NULL)
+    {
+        while ((ent = readdir(dir)) != NULL)
+        {
+            string fname = ent->d_name;
+            if (fname != "." && fname != "..")
+            {
+                string child = dirName;
+                if (!sutl::endsWith(child, "/"))
+                    child += "/";
+                child += fname;
+                if (ent->d_type == DT_DIR || (ent->d_type == DT_LNK && dirExists(child)))
+                {
+                    getDirectory(child, arr);
+                } else
+                {
+                    string su = suffix(child);
+                    if (!ext.empty() && ext.find(su) == string::npos)
+                        continue;
+                    arr->push_back(child);
+                }
+            }
+        }
+        closedir(dir);
+    } else
+    {
+        printf("\n");
+        perror(dirName.c_str());
+        return -1;
+    }
+    return 0;
 }
 
-bool Toolkit::fexists(QString fname)
+string Toolkit::shortName(const string& s)
 {
-	return access(QS(fname), 0) == 0;
+    size_t pos = s.find_last_of("/");
+    if (pos == string::npos)
+        return s;
+    return s.substr(pos + 1);
+}
+
+string Toolkit::suffix(const string& s)
+{
+    size_t pos = s.find_last_of(".");
+    if (pos == string::npos)
+        return "";
+    return s.substr(pos + 1);
+}
+
+int Toolkit::getFileLines(const string& fname, vector<string>& vlines)
+{
+    ifstream infile(fname);
+    string line;
+    while (getline(infile, line))
+    {
+        vlines.push_back(line);
+    }
+    infile.close();
+    return 0;
+}
+
+string Toolkit::homeDir()
+{
+    struct passwd *pw = getpwuid(getuid());
+    assert(pw != NULL && pw->pw_dir != NULL);
+    return string(pw->pw_dir);
+}
+
+string Toolkit::desktopDir()
+{
+    Toolkit toolkit;
+    string desktopPath = "~/Desktop";
+    vector<string> v;
+    string home = homeDir();
+    getFileLines(home + "/.config/user-dirs.dirs", v);
+    for (auto s : v)
+    {
+        if (sutl::startsWith(s, "XDG_DESKTOP_DIR="))
+        {
+            s = sutl::replace(s, "XDG_DESKTOP_DIR=", "");
+            s = sutl::replace(s, "\"", "");
+            desktopPath = s;
+            break;
+        }
+    }
+    desktopPath = sutl::replace(desktopPath, "$HOME", home);
+    desktopPath = sutl::replace(desktopPath, "~/", home + "/");
+    return desktopPath;
+}
+
+bool Toolkit::fileExists(const string& fname)
+{
+    return access(fname.c_str(), 0) == 0;
+}
+
+bool Toolkit::dirExists(const string& pathname)
+{
+    struct stat info;
+    return stat(pathname.c_str(), &info) == 0 && (info.st_mode & S_IFDIR);
+}
+
+void Toolkit::load(const string& fname, string& buf)
+{
+    ifstream infile(fname);
+    std::getline(infile, buf, char(-1));
+    infile.close();
 
 }
 
-int Toolkit::getDirectory(QString dirName, vector<QString> * arr, QString ext, bool withSub)
+int Toolkit::save(const string& fname, const string& buf)
 {
-
-	DIR *dir = opendir(QS(dirName));
-	if (dir == NULL)
-		return -1;
-
-	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL)
-	{
-		QString fname = ent->d_name;
-		if (fname != "." && fname != "..")
-		{
-			QString childPath = dirName + "/" + fname;
-			childPath.replace("//", "/");
-			if (ent->d_type == DT_DIR)
-			{
-				if (withSub)
-				{
-					getDirectory(childPath, arr, ext, withSub);
-					//if (res)
-					//	return res;
-				}
-			} else
-			{
-				if (ext != "" && !childPath.endsWith(ext))
-					continue;
-				arr->push_back(childPath);
-			}
-		}
-	}
-	closedir(dir);
-	return 0;
-
-}
-
-void Toolkit::removeRecursively(QString path)
-{
-	vector<QString> vfiles;
-	getDirectory(path, &vfiles);
-	map<QString, QString> vdir;
-	//QDir odir;
-
-	//QFile(PATH(UNZIP)+"/resource.tar.gz").remove();
-
-	for (auto fname : vfiles)
-	{
-		assert(fname.contains("a1menu/"));
-		/*
-		 auto res = QFile(fname).remove();
-		 */
-
-		auto res = unlink(QS(fname));
-		if (res)
-			qDebug("remove file error %i: %s", res, QS(fname));
-		//system(QS("touch "+fname));
-
-		QString path = QFileInfo(fname).path();
-		vdir[QString().sprintf("%6i %s", 9999 - path.length(), QS(path))] = path;
-	}
-	for (auto e : vdir)
-	{
-		QString fdir = e.second;
-		assert(fdir.contains("a1menu/"));
-		//auto res = odir.rmdir(fdir);
-
-		auto res = rmdir(QS(fdir));
-		if (res)
-			qDebug("remove directory error %i: %s", res, QS(fdir));
-	}
-}
-
-int Toolkit::getFileLines(QString fname, std::vector<QString>& vlines)
-{
-	FILE *f = fopen(QS(fname), "r");
-	if (f == NULL)
-	{
-		//perror(QS(fname));
-		return -1;
-	}
-	QTextStream in(f, QIODevice::ReadOnly);
-	in.setCodec("UTF-8");
-	while (!in.atEnd())
-	{
-		QString l = in.readLine();
-		vlines.push_back(l);
-		//qDebug("line <%s>", l.toStdString().c_str());
-	}
-	fclose(f);
-	return 0;
-}
-
-int Toolkit::runCommand(QString command)
-{
-	bool res = QProcess::startDetached(command);
-	if (!res)
-		return -1;
-	return 0;
-}
-
-QString Toolkit::getFileText(QString fname)
-{
-	FILE *f = fopen(QS(fname), "r");
-	if (f == NULL)
-	{
-		//perror(QS(fname));
-		return "";
-	}
-	QTextStream in(f, QIODevice::ReadOnly);
-	in.setCodec("UTF-8");
-	QString buf = in.readAll();
-	fclose(f);
-	return buf;
-}
-
-QString Toolkit::getFileHash(QString fname)
-{
-	QCryptographicHash crypto(QCryptographicHash::Sha1);
-	QFile file(fname);
-	file.open(QFile::ReadOnly);
-	while (!file.atEnd())
-	{
-		crypto.addData(file.read(8192));
-	}
-	file.close();
-	QByteArray hash = crypto.result();
-	QString h;
-	for (auto c : hash)
-		h.sprintf("%s%02X", QS(h), c & 0xFF);
-	//qDebug("hash %s %s",QS(h),QS(fname));
-	return h;
-}
-
-QString Toolkit::getHash(const char * buf, int len)
-{
-	QCryptographicHash crypto(QCryptographicHash::Sha1);
-	crypto.addData(QByteArray(buf, len));
-	QByteArray hash = crypto.result();
-	QString h;
-	for (auto c : hash)
-		h.sprintf("%s%02X", QS(h), c & 0xFF);
-	return h;
-
+    std::ofstream f;
+    f.open(fname, std::ios::out | std::ios::binary | std::fstream::app);
+    if (!f.is_open())
+        return -1;
+    f << buf;
+    f.close();
+    return 0;
 }
 
 Toolkit::microsectype Toolkit::GetMicrosecondsTime()
 {
-	struct timeval tv;
-	if (gettimeofday(&tv, nullptr) != 0)
-		return 0;
-	microsectype lsec = (microsectype) tv.tv_sec;
-	lsec *= 1000000ULL;
-	microsectype usec = (microsectype) tv.tv_usec;
-	return lsec + usec;
+    struct timeval tv;
+    if (gettimeofday(&tv, nullptr) != 0)
+        return 0;
+    microsectype lsec = (microsectype) tv.tv_sec;
+    lsec *= 1000000ULL;
+    microsectype usec = (microsectype) tv.tv_usec;
+    return lsec + usec;
 }
 
-Toolkit::Locker::Locker(QMutex * m)
+string Toolkit::md5(const string& inbuf)
 {
-	this->m = m;
-	locked = m->tryLock();
-}
-Toolkit::Locker::~Locker()
-{
-	if (locked)
-		m->unlock();
+    /* using CryptoPP
+     using namespace CryptoPP::Weak1;
+     byte digest[MD5::DIGESTSIZE];
+     MD5().CalculateDigest(digest, (unsigned char*) inbuf.c_str(), inbuf.length());
+     string md5=std::string((char*) digest, MD5::DIGESTSIZE);
+     assert(md5.length()==16);
+     std::stringstream ss;
+     char buf[8];
+     for (int i = 0; i < 16; i++)
+     {
+     sutl::format(buf, "%02x", (md5.at(i) & 0xFF));
+     ss << buf;
+     }
+     return ss.str();
+     */
+
+    /* using OpenSSL
+     MD5_CTX c;
+     unsigned char digest[16];
+     MD5_Init(&c);
+     MD5_Update(&c, (unsigned char*) inbuf.c_str(), inbuf.length());
+     MD5_Final(digest, &c);
+     std::stringstream ss;
+     char buf[8];
+     for (int i = 0; i < 16; i++)
+     {
+     sutl::format(buf, "%02x", digest[i]);
+     ss << buf;
+     }
+     return ss.str();
+     */
+
+    static bool init = false;
+    if (!init)
+    {
+        init = true;
+        assert(md5("") == "d41d8cd98f00b204e9800998ecf8427e");
+    }
+    return md5::digest(inbuf);
+
 }
 
-bool Toolkit::Locker::isLocked()
+string Toolkit::fileMD5(const string& fname)
 {
-	return locked;
+    ifstream infile(fname);
+    string buf;
+    std::getline(infile, buf, char(-1));
+    infile.close();
+    return md5(buf);
 }
 

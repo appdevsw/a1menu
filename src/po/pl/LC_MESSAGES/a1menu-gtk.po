@@ -1,0 +1,330 @@
+# Polish translations for a package
+# Polskie t³umaczenia dla pakietu a.
+# Copyright (C) 2016 THE a'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the a package.
+# wlstr <wlstr@fedora>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: a 1menu-gtk-src\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-10-18 14:48+0200\n"
+"PO-Revision-Date: 2016-10-18 14:51+0200\n"
+"Last-Translator: wlstr <wlstr@fedora>\n"
+"Language-Team: Polish\n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 1.8.8\n"
+
+#: ../application.h:68
+msgid "All"
+msgstr "Wszystkie"
+
+#: ../config.cpp:130
+msgid "Applications"
+msgstr "Aplikacje"
+
+#: ../config.cpp:151
+msgid "Categories"
+msgstr "Kategorie"
+
+#: ../config.cpp:166 ../guiitem.cpp:453
+msgid "Category"
+msgstr "Kategoria"
+
+#: ../application.h:105
+msgid "Category alias"
+msgstr "Alias kategorii"
+
+#: ../config.cpp:124
+msgid "Clear cache"
+msgstr "Wyczy¶æ pamiêæ podrêczn± ikon"
+
+#: ../guiitem.cpp:447
+msgid "Command"
+msgstr "Polecenie"
+
+#: ../applicationloader.cpp:181 ../config.cpp:185 ../config.cpp:193
+msgid "Computer"
+msgstr "Komputer"
+
+#: ../application.h:100
+msgid "Default category"
+msgstr "Kategoria domy¶lna"
+
+#.
+#: ../application.h:76 ../applicationloader.cpp:184 ../config.cpp:189
+#: ../config.cpp:197
+msgid "Desktop"
+msgstr "Pulpit"
+
+#: ../guiitem.cpp:449
+msgid "Directory file"
+msgstr "Plik katalogu"
+
+#: ../config.cpp:161
+msgid "Display on the right"
+msgstr "Umie¶æ po prawej"
+
+#: ../application.h:74
+msgid "Favorites"
+msgstr "Ulubione"
+
+#: ../config.cpp:181
+msgid "File manager"
+msgstr "Mened¿er plików"
+
+#: ../config.cpp:186 ../config.cpp:194
+msgid "Home"
+msgstr "Katalog domowy"
+
+#.
+#: ../applicationloader.cpp:182
+msgid "Home folder"
+msgstr "Katalog domowy"
+
+#: ../config.cpp:122
+msgid "Hot key"
+msgstr "Klawisz skrótu"
+
+#: ../guiitem.cpp:451
+msgid "Icon"
+msgstr "Ikona"
+
+#: ../config.cpp:143 ../config.cpp:157 ../config.cpp:180 ../config.cpp:201
+msgid "Icon size"
+msgstr "Rozmiar ikony"
+
+#: ../application.h:98
+msgid "In favorites"
+msgstr "W ulubionych"
+
+#: ../guiparametersform.cpp:186
+msgid "Invalid integer"
+msgstr "B³êdna liczba"
+
+#: ../guiitem.cpp:449
+msgid "Launcher"
+msgstr "Aktywator"
+
+#: ../config.cpp:202
+msgid "Location"
+msgstr "Po³o¿enie"
+
+#: ../application.h:81 ../config.cpp:206 ../config.cpp:214
+msgid "Lock screen"
+msgstr "Zablokuj ekran"
+
+#: ../application.h:82 ../config.cpp:215
+msgid "Logout"
+msgstr "Wyloguj"
+
+#: ../config.cpp:149
+msgid "Max.number of recent entries"
+msgstr "Maks.ilo¶æ ostatnio uruchamianych"
+
+#: ../applet.cpp:71 ../config.cpp:115
+msgid "Menu"
+msgstr "Menu"
+
+#: ../config.cpp:121
+msgid "Menu icon on the panel"
+msgstr "Ikona menu na panelu"
+
+#: ../config.cpp:120
+msgid "Menu label on the panel"
+msgstr "Etykieta menu na panelu"
+
+#: ../application.h:84 ../guiparametersform.cpp:35
+msgid "Menu preferences"
+msgstr "Ustawienia menu"
+
+#: ../application.h:101
+msgid "Move to category"
+msgstr "Przenie¶ do kategorii"
+
+#.
+#: ../applicationloader.cpp:183 ../config.cpp:187 ../config.cpp:195
+msgid "Network"
+msgstr "Sieæ"
+
+#: ../application.h:78
+msgid "Other"
+msgstr "Pozosta³e"
+
+#: ../config.cpp:113
+msgid "Parameters"
+msgstr "Parametry"
+
+#: ../application.h:70 ../config.cpp:174
+msgid "Places"
+msgstr "Miejsca"
+
+#: ../config.cpp:211
+msgid "Preferences"
+msgstr "Ustawienia"
+
+#: ../application.h:99
+msgid "Properties"
+msgstr "W³a¶ciwo¶ci"
+
+#: ../guiparametersform.cpp:193
+msgid "Range error"
+msgstr "B³±d zakresu"
+
+#: ../application.h:72
+msgid "Recently used"
+msgstr "Ostatnio u¿ywane"
+
+#: ../application.h:83 ../config.cpp:212
+msgid "Reload menu"
+msgstr "Prze³aduj menu"
+
+#: ../application.h:103
+msgid "Reloading..."
+msgstr "£adowanie..."
+
+#: ../config.cpp:140 ../config.cpp:154 ../config.cpp:177
+msgid "Row height"
+msgstr "Wysko¶æ wiersza"
+
+#: ../application.h:102
+msgid "Search:"
+msgstr "Szukaj:"
+
+#: ../config.cpp:207
+msgid "Session logout"
+msgstr "Wyloguj"
+
+#: ../config.cpp:144
+msgid "Show comments"
+msgstr "Poka¿ komentarze"
+
+#: ../config.cpp:146 ../config.cpp:159
+msgid "Show icons"
+msgstr "Poka¿ ikony"
+
+#: ../config.cpp:145 ../config.cpp:158
+msgid "Show texts"
+msgstr "Poka¿ tekst"
+
+#: ../config.cpp:147 ../config.cpp:160
+msgid "Show tooltips"
+msgstr "Poka¿ podpowiedzi"
+
+#: ../application.h:80
+msgid "Shudown"
+msgstr "Wy³±cz komputer"
+
+#: ../config.cpp:213
+msgid "Shutdown"
+msgstr "Wy³±cz komputer"
+
+#: ../config.cpp:205
+msgid "Shutown"
+msgstr "Wy³±cz komputer"
+
+#: ../config.cpp:119
+msgid "Synchronization delay [ms]"
+msgstr "Czas synchronizacji [ms]"
+
+#: ../config.cpp:199
+msgid "Toolbar"
+msgstr "Pasek przycisków"
+
+#.
+#: ../applicationloader.cpp:185 ../config.cpp:188 ../config.cpp:196
+msgid "Trash"
+msgstr "Kosz"
+
+#: ../config.cpp:148
+msgid "Use generic names"
+msgstr "U¿yj nazw generycznych"
+
+#: ../guiparametersform.cpp:203
+msgid "Value is not allowed"
+msgstr "B³êdna warto¶æ"
+
+#: ../guiparametersform.cpp:178
+msgid "Value must be entered"
+msgstr "Pole musi byæ wype³nione"
+
+#: ../config.cpp:133
+msgid "Vertical padding"
+msgstr "Margines poziomy"
+
+#: ../config.cpp:118
+msgid "Window location"
+msgstr "Po³o¿enie okna menu"
+
+#: ../config.cpp:168
+msgid "`All`"
+msgstr "`Wszystkie`"
+
+#: ../config.cpp:169
+msgid "`Favorites`"
+msgstr "`Ulubione`"
+
+#: ../config.cpp:170
+msgid "`Other`"
+msgstr "`Pozosta³e`"
+
+#: ../config.cpp:172
+msgid "`Places`"
+msgstr "`Miejsca`"
+
+#: ../config.cpp:171
+msgid "`Recently used`"
+msgstr "`Ostatnio u¿ywane`"
+
+#: ../application.cpp:77
+msgid "auto"
+msgstr "auto"
+
+#: ../application.cpp:84
+msgid "bottom"
+msgstr "na dole"
+
+#: ../config.cpp:183 ../config.cpp:204
+msgid "commands"
+msgstr "polecenia"
+
+#: ../application.cpp:87
+msgid "default"
+msgstr "domy¶lnie"
+
+#: ../config.cpp:163 ../config.cpp:191 ../config.cpp:209
+msgid "icons"
+msgstr "ikony"
+
+#: ../application.cpp:79
+msgid "manually by mouse dragging"
+msgstr "rêcznie"
+
+#: ../application.cpp:74
+msgid "no"
+msgstr "nie"
+
+#: ../application.cpp:82
+msgid "top"
+msgstr "na górze"
+
+#: ../application.cpp:71
+msgid "yes"
+msgstr "tak"
+
+#~ msgid "Add to favorites"
+#~ msgstr "Dodaj do ulubionych"
+
+#~ msgid "Remove from favorites"
+#~ msgstr "Usuñ z ulubionych"
+
+#~ msgid "Category:"
+#~ msgstr "Kategoria:"
+
+#~ msgid "Category `All`"
+#~ msgstr "Kategoria `Wszystkie`"

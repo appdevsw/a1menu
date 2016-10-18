@@ -1,0 +1,315 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-10-18 14:48+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../application.h:68
+msgid "All"
+msgstr ""
+
+#: ../config.cpp:130
+msgid "Applications"
+msgstr ""
+
+#: ../config.cpp:151
+msgid "Categories"
+msgstr ""
+
+#: ../config.cpp:166 ../guiitem.cpp:453
+msgid "Category"
+msgstr ""
+
+#: ../application.h:105
+msgid "Category alias"
+msgstr ""
+
+#: ../config.cpp:124
+msgid "Clear cache"
+msgstr ""
+
+#: ../guiitem.cpp:447
+msgid "Command"
+msgstr ""
+
+#: ../applicationloader.cpp:181 ../config.cpp:185 ../config.cpp:193
+msgid "Computer"
+msgstr ""
+
+#: ../application.h:100
+msgid "Default category"
+msgstr ""
+
+#.
+#: ../application.h:76 ../applicationloader.cpp:184 ../config.cpp:189
+#: ../config.cpp:197
+msgid "Desktop"
+msgstr ""
+
+#: ../guiitem.cpp:449
+msgid "Directory file"
+msgstr ""
+
+#: ../config.cpp:161
+msgid "Display on the right"
+msgstr ""
+
+#: ../application.h:74
+msgid "Favorites"
+msgstr ""
+
+#: ../config.cpp:181
+msgid "File manager"
+msgstr ""
+
+#: ../config.cpp:186 ../config.cpp:194
+msgid "Home"
+msgstr ""
+
+#.
+#: ../applicationloader.cpp:182
+msgid "Home folder"
+msgstr ""
+
+#: ../config.cpp:122
+msgid "Hot key"
+msgstr ""
+
+#: ../guiitem.cpp:451
+msgid "Icon"
+msgstr ""
+
+#: ../config.cpp:143 ../config.cpp:157 ../config.cpp:180 ../config.cpp:201
+msgid "Icon size"
+msgstr ""
+
+#: ../application.h:98
+msgid "In favorites"
+msgstr ""
+
+#: ../guiparametersform.cpp:186
+msgid "Invalid integer"
+msgstr ""
+
+#: ../guiitem.cpp:449
+msgid "Launcher"
+msgstr ""
+
+#: ../config.cpp:202
+msgid "Location"
+msgstr ""
+
+#: ../application.h:81 ../config.cpp:206 ../config.cpp:214
+msgid "Lock screen"
+msgstr ""
+
+#: ../application.h:82 ../config.cpp:215
+msgid "Logout"
+msgstr ""
+
+#: ../config.cpp:149
+msgid "Max.number of recent entries"
+msgstr ""
+
+#: ../applet.cpp:71 ../config.cpp:115
+msgid "Menu"
+msgstr ""
+
+#: ../config.cpp:121
+msgid "Menu icon on the panel"
+msgstr ""
+
+#: ../config.cpp:120
+msgid "Menu label on the panel"
+msgstr ""
+
+#: ../application.h:84 ../guiparametersform.cpp:35
+msgid "Menu preferences"
+msgstr ""
+
+#: ../application.h:101
+msgid "Move to category"
+msgstr ""
+
+#.
+#: ../applicationloader.cpp:183 ../config.cpp:187 ../config.cpp:195
+msgid "Network"
+msgstr ""
+
+#: ../application.h:78
+msgid "Other"
+msgstr ""
+
+#: ../config.cpp:113
+msgid "Parameters"
+msgstr ""
+
+#: ../application.h:70 ../config.cpp:174
+msgid "Places"
+msgstr ""
+
+#: ../config.cpp:211
+msgid "Preferences"
+msgstr ""
+
+#: ../application.h:99
+msgid "Properties"
+msgstr ""
+
+#: ../guiparametersform.cpp:193
+msgid "Range error"
+msgstr ""
+
+#: ../application.h:72
+msgid "Recently used"
+msgstr ""
+
+#: ../application.h:83 ../config.cpp:212
+msgid "Reload menu"
+msgstr ""
+
+#: ../application.h:103
+msgid "Reloading..."
+msgstr ""
+
+#: ../config.cpp:140 ../config.cpp:154 ../config.cpp:177
+msgid "Row height"
+msgstr ""
+
+#: ../application.h:102
+msgid "Search:"
+msgstr ""
+
+#: ../config.cpp:207
+msgid "Session logout"
+msgstr ""
+
+#: ../config.cpp:144
+msgid "Show comments"
+msgstr ""
+
+#: ../config.cpp:146 ../config.cpp:159
+msgid "Show icons"
+msgstr ""
+
+#: ../config.cpp:145 ../config.cpp:158
+msgid "Show texts"
+msgstr ""
+
+#: ../config.cpp:147 ../config.cpp:160
+msgid "Show tooltips"
+msgstr ""
+
+#: ../application.h:80
+msgid "Shudown"
+msgstr ""
+
+#: ../config.cpp:213
+msgid "Shutdown"
+msgstr ""
+
+#: ../config.cpp:205
+msgid "Shutown"
+msgstr ""
+
+#: ../config.cpp:119
+msgid "Synchronization delay [ms]"
+msgstr ""
+
+#: ../config.cpp:199
+msgid "Toolbar"
+msgstr ""
+
+#.
+#: ../applicationloader.cpp:185 ../config.cpp:188 ../config.cpp:196
+msgid "Trash"
+msgstr ""
+
+#: ../config.cpp:148
+msgid "Use generic names"
+msgstr ""
+
+#: ../guiparametersform.cpp:203
+msgid "Value is not allowed"
+msgstr ""
+
+#: ../guiparametersform.cpp:178
+msgid "Value must be entered"
+msgstr ""
+
+#: ../config.cpp:133
+msgid "Vertical padding"
+msgstr ""
+
+#: ../config.cpp:118
+msgid "Window location"
+msgstr ""
+
+#: ../config.cpp:168
+msgid "`All`"
+msgstr ""
+
+#: ../config.cpp:169
+msgid "`Favorites`"
+msgstr ""
+
+#: ../config.cpp:170
+msgid "`Other`"
+msgstr ""
+
+#: ../config.cpp:172
+msgid "`Places`"
+msgstr ""
+
+#: ../config.cpp:171
+msgid "`Recently used`"
+msgstr ""
+
+#: ../application.cpp:77
+msgid "auto"
+msgstr ""
+
+#: ../application.cpp:84
+msgid "bottom"
+msgstr ""
+
+#: ../config.cpp:183 ../config.cpp:204
+msgid "commands"
+msgstr ""
+
+#: ../application.cpp:87
+msgid "default"
+msgstr ""
+
+#: ../config.cpp:163 ../config.cpp:191 ../config.cpp:209
+msgid "icons"
+msgstr ""
+
+#: ../application.cpp:79
+msgid "manually by mouse dragging"
+msgstr ""
+
+#: ../application.cpp:74
+msgid "no"
+msgstr ""
+
+#: ../application.cpp:82
+msgid "top"
+msgstr ""
+
+#: ../application.cpp:71
+msgid "yes"
+msgstr ""

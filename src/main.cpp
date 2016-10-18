@@ -1,157 +1,101 @@
-#include <imgconv.h>
-#include "mainwindow.h"
-#include <QApplication>
-#include <QFuture>
-#include <QtConcurrentRun>
-#include <unistd.h>
-#include <signal.h>
-#include <malloc.h>
-#include "ctx.h"
-#include "config.h"
-#include "loader.h"
-#include "resource.h"
-#include <X11/Xlib.h>
+#include <gtk/gtk.h>
+#include <stdio.h>
+#include <assert.h>
+#include <vector>
 
-ctx::clockmicro_t tbegin;
+#include "application.h"
+#include "guiparametersform.h"
+#include "x11util.h"
+#include "sutl.h"
+#include "installer.h"
+#include "applet.h"
 
-void *qtApplicationThreadFunc(void * ptdv)
-{
-	qDebug("Starting Qt thread...");
-
-	ctx::thread_data_t * ptd = &ctx::thread_data;
-	QApplication application(ptd->argc, ptd->argv);
-	ctx::application = &application;
-	MainWindow mainWindow;
-	ctx::wnd = &mainWindow;
-	ptd->mainQtWindow = &mainWindow;
-	if (ptd->inthread)
-		ctx::standaloneMode = false;
-
-	mainWindow.init();
-
-#ifdef CONFSYM
-	qDebug("configuration %s", CONFSYM);
-#endif
-
-	application.setQuitOnLastWindowClosed(false);
-	application.exec();
-	qDebug("Exit Qt thread...");
-	int ret = 0;
-	if (ptd->inthread)
-		pthread_exit(&ret);
-	return NULL;
-}
-
-int applet_main(int, char **);
-void setMainArguments(int argc, char ** argv, MainWindow * wnd);
-
-//kill -s SIGUSR1 $(ps -A | grep a1menu.run | awk '{print $1}')
-
+using namespace std;
 
 void sig_handler(int signo)
 {
-	printf("received signal %i\n", signo);
-	if (ctx::thread_data.mainQtWindow != NULL)
-		ctx::thread_data.mainQtWindow->sendShowEvent();
-}
-
-void sig_handler_null(int signo)
-{
+    if (signo == app->SIG_RELOAD)
+    {
+        app->reload(false);
+    }
+    if (signo == app->SIG_CLEAR_CACHE)
+    {
+        app->reload(true);
+    }
 }
 
 int main(int argc, char *argv[])
 {
-	ctx::thread_data.tstart = tbegin = ctx::clockmicro();
-	signal(SIGUSR1, sig_handler_null);
-	XInitThreads();
-	ctx::thread_data_t * td = &ctx::thread_data;
-	ctx::wnd = NULL;
-	td->inthread = 1;
-	QString arg1 = argc > 1 ? argv[1] : "";
-	if (arg1 == ctx::procParRunStandalone)
-	{
-		td->inthread = 0;
-		if (argc > 2 && QString(argv[2]) == ctx::procParHideCtrlButton)
-			td->hideCtrlButton = 1;
-	}
-	td->argc = argc;
-	td->argv = argv;
+    setvbuf(stdout, NULL, _IONBF, 0); //printf & \n issue
+    setvbuf(stderr, NULL, _IONBF, 0);
+    XInitThreads();
 
-	if (arg1 == ctx::procParImgCache)
-	{
-		QApplication application(argc, argv);
-		if (argc == 4)
-		{
-			return ImgConv().createCacheIcon(argv[2], atoi(argv[3]));
-		}
-		printf("\n%s: missing arguments.", QS(arg1));
-		return -1;
-	}
+    string arg, arg2;
+    if (argc > 1)
+        arg = argv[1];
+    if (argc > 2)
+        arg2 = argv[2];
 
-	if (arg1 == ctx::procParConfig)
-	{
-		if (argc < 3)
-		{
-			printf("\n%s: missing arguments.", QS(arg1));
-			exit(1);
-		}
+    // --- init translations
+    string domain = Application::A1MENU_GTK;
+    setlocale(LC_ALL, "");
+    bindtextdomain(domain.c_str(), APP_TEXT_DOMAIN);
+    textdomain(domain.c_str());
 
-		return Config::runDialogProcessProc(QString(argv[2]).toInt());
-	}
+    if (argc == 0 || arg == "--run" || arg == "--applet")
+        printf("\ntranslation domain: %s, location: %s", textdomain(NULL), bindtextdomain(domain.c_str(), NULL));
+    // -------------------
 
-	if (arg1 == ctx::procParLoader)
-	{
-		Loader().srvMain();
-		return 0;
-	}
+    app = new Application();
+    app->init(argc, argv);
 
-	if (arg1 == ctx::procParResource)
-	{
-		if (argc != 4)
-		{
-			qDebug("for %s expected the project path and the output file", argv[1]);
-			exit(1);
-		}
-		Resource().createResources(argv[2], argv[3]);
-		return 0;
-	}
+    if (arg == string("--makedeb"))
+    {
+        Installer().createDebPackage(arg2);
+        exit(0);
+    }
+    if (arg == string("--makerpm"))
+    {
+        Installer().createRpmPackage(arg2);
+        exit(0);
+    }
 
-	ctx::loader = new Loader();
-	ctx::loader->initServer();
+    if (arg == string("--load"))
+    {
+        gtk_init(&argc, &argv);
+        (new Loader())->loadProc();
+        exit(0);
+    }
 
-	signal(SIGUSR1, sig_handler);
+    if (arg == string("--pform"))
+    {
+        if (argc != 3)
+        {
+            printf("\n --pform : missing PPID");
+            exit(1);
+        }
+        int ppid = atoi(argv[2]);
+        gtk_init(&argc, &argv);
+        GuiParametersForm pf;
+        int result = pf.create(ppid);
+        exit(result);
+    }
 
-	if (td->inthread) //run in MATE panel
-	{
-		ctx::thread_data.isGtkInitialized = 0;
+    if (arg == string("--run"))
+    {
+        signal(app->SIG_RELOAD, sig_handler);
+        signal(app->SIG_CLEAR_CACHE, sig_handler);
+        app->start();
+        printf("\nExit");
+        exit(0);
+    }
 
-		pthread_t thr;
-		int rc = pthread_create(&thr, NULL, qtApplicationThreadFunc, (void*) td);
-		if (rc)
-		{
-			qDebug("Qt thread initialization error %i", rc);
-			exit(1);
-		}
-		pthread_detach(thr);
+    if (arg == string("--applet") || arg.empty())
+    {
+        signal(app->SIG_RELOAD, sig_handler);
+        signal(app->SIG_CLEAR_CACHE, sig_handler);
+        Applet::appletMain(argc, argv);
+    }
 
-		int count = 0;
-		while (td->mainQtWindow == NULL)
-		{
-			if (++count % 50 == 0)
-				printf("wait for Qt thread...\n");
-			usleep(1000);
-		}
-
-		setMainArguments(argc, argv, td->mainQtWindow);
-		applet_main(argc, argv);
-		//ctx::wnd->quitApp();
-
-	} else //run standalone
-	{
-		qtApplicationThreadFunc(td);
-	}
-	printf("Exit main thread.\n");
-	return 0;
-
+    return 0;
 }
-

@@ -1,0 +1,14 @@
+#ifndef A1MENU_GTK_SRC_ENUMS_H_
+#define A1MENU_GTK_SRC_ENUMS_H_
+
+enum SortMode
+{
+    DEFAULT, BY_RECENT, UNDEFINED,
+};
+
+enum TimerAction
+{
+    RELOAD, TOGGLE_SHOW, MONITOR,LOADER_FINISH
+};
+
+#endif /* A1MENU_GTK_SRC_ENUMS_H_ */

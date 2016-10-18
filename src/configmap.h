@@ -3,39 +3,48 @@
 
 #include <vector>
 #include <map>
-#include <QString>
+#include <string>
+
+using std::string;
+using std::vector;
+using std::map;
 
 class ConfigMap
 {
-
 public:
-	struct entry
+	struct Entry
 	{
-		QString value;
+		string value;
 	};
 	ConfigMap();
 	void clear();
-	int load(QString fname, bool override = false);
-	int save(QString fname,bool skipEmpty=false);
-	QString& operator[](const QString& key);
+	int load(const string& fname, bool override = false);
+	int save(const string& fname);
+	string& operator[](const string& key);
 	void setCheckExistence(bool c);
 	void setKeyCaseSensitive(bool c);
-	void puti(QString key, int val);
-	int split(QString key, std::vector<QString>& arr);
+	void puti(const string& key, int val);
+    int  geti(const string& key);
+	int split(const string& key, std::vector<string>& arr);
 	void copyTo(ConfigMap& c);
-	std::map<QString, QString> getMap();
-	const std::map<QString, ConfigMap::entry>& getMapRef();
+	Entry * getEntry(const string& key);
+	string pack();
+	void unpack(const string& packed);
+    std::map<string, string> getMap();
+    bool exists(const string& key);
+    bool remove(const string& key);
+
 private:
-	QString listSep = ";";
-	std::map<QString, entry> mapKV;
+	string listSep = ";";
+	std::map<string, Entry> mapKV;
 	bool caseSensitive = false;
 	bool doCheck = false;
 
-	inline QString index(const QString& key);
-	inline entry& getEntry(const QString& key);
-	void put(const QString& key,const  QString& val);
-	QString get(const QString& key);
+	inline string index(const string& key);
+	void put(const string& key, const string& val);
+	string get(const string& key);
 
 };
+
 
 #endif // CONFIGMAP_H

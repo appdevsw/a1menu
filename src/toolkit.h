@@ -1,41 +1,44 @@
 #ifndef TOOLKIT_H
 #define TOOLKIT_H
+#include <string>
 #include <vector>
-#include <QString>
+#include <map>
 
-class QMutex;
-
+using std::string;
+using std::vector;
 
 class Toolkit
 {
 public:
-	typedef unsigned long long microsectype;
-	Toolkit();
-	virtual ~Toolkit();
-	int getDirectory(QString dirName, std::vector<QString> * arr,QString ext="",bool withSub=true);
-	void removeRecursively(QString path);
-	void tokenize(QString buf, std::vector<QString>& arr, QString delim = "");
-	int getFileLines(QString fname, std::vector<QString>& vlines);
-	bool fexists(QString fname);
-	int runCommand(QString command);
-	QString getFileText(QString fname);
-	QString getFileHash(QString fname);
-	QString getHash(const char * buf,int len);
-	microsectype GetMicrosecondsTime();
-
-	class Locker
-	{
-		QMutex * m = NULL;
-		bool locked;
-	public:
-		Locker(QMutex * m);
-		~Locker();
-		bool isLocked();
-	};
-
-
+    Toolkit();
+    virtual ~Toolkit();
+    int getDirectory(const string& dirName, vector<string> * arr, const string& ext = "");
+    string shortName(const string& s);
+    string suffix(const string& s);
+    string homeDir();
+    string desktopDir();
+    string md5(const string&);
+    string fileMD5(const string& fname);
+    bool fileExists(const string& fname);
+    bool dirExists(const string& pathname);
+    void load(const string& fname, string& buf);
+    int save(const string& fname, const string& buf);
+    int getFileLines(const string& fname, vector<string>& vlines);
+    typedef unsigned long long microsectype;
+    microsectype GetMicrosecondsTime();
 
 };
 
+/*
+ class FDebug
+ {
+ private:
+ char buf[1024];
+ public:
+ FDebug(string fname);
+ void prnf(char * buf);
+ void prn(const char* format, ...);
+ void clear();
+ };*/
 
 #endif // TOOLKIT_H

@@ -1,12 +1,12 @@
 #include "configmap.h"
-#include "ctx.h"
+#include <algorithm>
+#include <string>
+#include <sstream>
+#include <fstream>
 #include "toolkit.h"
-#include <QIODevice>
-#include <QFile>
-#include <QTextStream>
+#include "sutl.h"
 
 using namespace std;
-using namespace ctx;
 
 ConfigMap::ConfigMap()
 {
@@ -14,147 +14,187 @@ ConfigMap::ConfigMap()
 
 void ConfigMap::clear()
 {
-	mapKV.clear();
+    mapKV.clear();
 }
 
 void ConfigMap::setCheckExistence(bool c)
 {
-	doCheck = c;
+    doCheck = c;
 }
 
 void ConfigMap::setKeyCaseSensitive(bool c)
 {
-	caseSensitive = c;
+    caseSensitive = c;
 }
 
-inline QString ConfigMap::index(const QString& key)
+inline string ConfigMap::index(const string& key)
 {
-	return (caseSensitive ? key : key.toLower()).trimmed();
+    if (caseSensitive)
+        return key;
+    string low = key;
+    std::transform(low.begin(), low.end(), low.begin(), ::tolower);
+    return low;
 }
 
-inline ConfigMap::entry& ConfigMap::getEntry(const QString& key)
+int ConfigMap::load(const string& fname, bool override)
 {
-	return mapKV.insert(std::pair<QString, entry>(index(key), {})).first->second;
-	/*
-	 auto ikey = index(key);
-	 auto it = mapKV.find(ikey);
-	 if (it != mapKV.end())
-	 return it->second;
-	 if (doCheck)
-	 {
-	 //qDebug("Config: wrong parameter <%s>", QS(key));
-	 ctx::errorDialog("Wrong configuration parameter " + key);
-	 exit(1);
-	 }
-	 mapKV[ikey];
-	 return mapKV.at(ikey);
-	 */
+    Toolkit toolkit;
+    vector<string> vlines;
+    int res = toolkit.getFileLines(fname, vlines);
+    if (res)
+        return res;
+    if (override)
+        clear();
+    for (string line : vlines)
+    {
+        size_t pos = line.find("=");
+        if (pos != string::npos)
+        {
+            string key = index(line.substr(0, pos));
+            string val = line.substr(pos + 1);
+            Entry * e = getEntry(key);
+            e->value = val;
+        }
+    }
+    return 0;
 }
 
-QString ConfigMap::get(const QString& key)
+int ConfigMap::save(const string& fname)
 {
-	return getEntry(key).value;
+    auto it = mapKV.begin();
+    std::ofstream ofile(fname);
+    while (it != mapKV.end())
+    {
+        string line = index(it->first) + "=" + (it->second.value) + "\n";
+        ofile << line;
+        it++;
+    }
+    ofile.close();
+    return 0;
 }
 
-QString& ConfigMap::operator[](const QString& key)
+std::map<string, string> ConfigMap::getMap()
 {
-	return getEntry(key).value;
+    std::map<string, string> m;
+    for (auto e : mapKV)
+        m[e.first] = e.second.value;
+    return m;
 }
 
-void ConfigMap::put(const QString& key, const QString& val)
+ConfigMap::Entry * ConfigMap::getEntry(const string& key)
 {
-	getEntry(key).value = val.trimmed();
+    auto it = mapKV.find(index(key));
+    if (it == mapKV.end())
+    {
+        if (doCheck)
+        {
+            printf("\nWrong configuration parameter %s", key.c_str());
+            exit(1);
+        }
+        Entry e = {};
+        mapKV[index(key)] = e;
+    }
+    return &(mapKV[index(key)]);
+}
+
+bool ConfigMap::exists(const string& key)
+{
+    return mapKV.find(index(key)) != mapKV.end();
 
 }
 
-void ConfigMap::puti(QString key, int val)
+bool ConfigMap::remove(const string& key)
 {
-	getEntry(key).value = QString::number(val);
+    auto it = mapKV.find(index(key));
+    auto res = it != mapKV.end();
+    if (res)
+        mapKV.erase(it);
+    return res;
+}
+
+string ConfigMap::get(const string& key)
+{
+    return (*getEntry(key)).value;
+}
+int ConfigMap::geti(const string& key)
+{
+    auto v = (*getEntry(key)).value;
+    return atoi(v.c_str());
+}
+
+string& ConfigMap::operator[](const string& key)
+{
+    return (*getEntry(key)).value;
+}
+
+void ConfigMap::put(const string& key, const string& val)
+{
+    (*getEntry(key)).value = val;
 
 }
 
-int ConfigMap::load(QString fname, bool override)
+void ConfigMap::puti(const string& key, int val)
 {
-	vector<QString> vlines;
-	int res = Toolkit().getFileLines(fname, vlines);
-	if (res)
-		return res;
-	if (override)
-		clear();
-	for (QString line : vlines)
-	{
-		size_t pos = line.indexOf("=");
-		if (pos >= 0)
-		{
-			QString key = index(line.mid(0, pos).trimmed());
-			QString val = line.mid(pos + 1).trimmed();
-			entry& e = getEntry(key);
-			e.value = val;
-		}
-	}
-
-	return 0;
+    std::ostringstream stm;
+    stm << val;
+    (*getEntry(key)).value = stm.str();
 }
 
-int ConfigMap::save(QString fname, bool skipEmpty)
+int ConfigMap::split(const string& key, std::vector<string>& arr)
 {
-	QFile outputFile(fname);
-	outputFile.open(QIODevice::WriteOnly);
-	if (!outputFile.isOpen())
-	{
-		qDebug("Error, unable to open %s for output", QS(fname));
-		return -1;
-		//exit(1);
-	}
-	QTextStream outStream(&outputFile);
-	for (auto it = mapKV.begin(); it != mapKV.end(); it++)
-	{
-		if (skipEmpty && it->second.value.isEmpty())
-			continue;
-		outStream << index(it->first) << "=" << (it->second.value) << "\n";
-	}
-	outputFile.close();
-	return 0;
-}
-
-int ConfigMap::split(QString key, std::vector<QString>& arr)
-{
-	arr.clear();
-	vector<QString> xarr;
-	QString val = get(key);
-	Toolkit().tokenize(val, xarr, listSep);
-	for (auto s : xarr)
-	{
-		s = s.trimmed();
-		if (s != "")
-			arr.push_back(s);
-	}
-	return arr.size();
+    arr.clear();
+    vector<string> xarr;
+    string val = get(key);
+    sutl::tokenize(val, xarr, listSep);
+    for (auto s : xarr)
+    {
+        if (s != "")
+            arr.push_back(s);
+    }
+    return arr.size();
 }
 
 void ConfigMap::copyTo(ConfigMap& c)
 {
-	c.clear();
-	auto it = mapKV.begin();
-	while (it != mapKV.end())
-	{
-		entry e = it->second;
-		//c[e.name] = it->first;
-		c.getEntry(it->first) = e;
-		it++;
-	}
+    c.clear();
+    auto it = mapKV.begin();
+    while (it != mapKV.end())
+    {
+        Entry e = it->second;
+        *(c.getEntry(it->first)) = e;
+        it++;
+    }
 
 }
 
-std::map<QString, QString> ConfigMap::getMap()
+string ConfigMap::pack()
 {
-	std::map<QString, QString> m;
-	for (auto e : mapKV)
-		m[e.first] = e.second.value;
-	return m;
+    string msg;
+    int count = 0;
+    auto it = mapKV.begin();
+    while (it != mapKV.end())
+    {
+        if (count++ > 0)
+            msg += "\n";
+        msg += it->first;
+        msg += "=";
+        msg += it->second.value;
+        it++;
+    }
+    return msg;
 }
 
-const std::map<QString, ConfigMap::entry>& ConfigMap::getMapRef()
+void ConfigMap::unpack(const string& packed)
 {
-	return mapKV;
+    clear();
+    auto v = sutl::split(packed, '\n');
+    for (auto line : v)
+    {
+        size_t pos = sutl::indexOf(line, "=");
+        if (pos >= 0)
+        {
+            auto v = line.substr(pos + 1);
+            put(line.substr(0, pos), v);
+        }
+    }
 }

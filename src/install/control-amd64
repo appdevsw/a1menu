@@ -1,8 +1,0 @@
-Package: a1menu
-Version: 1.0
-Architecture: amd64
-Maintainer: appdevsw <appdevsw@wp.pl>
-Installed-Size: 5000000
-Section: admin
-Priority: optional
-Description: Searchable menu for Debian MATE
