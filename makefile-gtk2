@@ -1,9 +1,0 @@
-GTKVER=gtk2
-TGT=./bin-gtk2
-CPPFLAGS  =-O3 -Wall -c -fmessage-length=0 -std=c++11  `pkg-config --cflags gtk+-2.0 glib-2.0`
-OBJS = $(addprefix $(TGT)/, $(notdir $(SOURCES:.cpp=.o)))
-
-LDFLAGS=-std=c++11  `pkg-config --cflags --libs gtk+-2.0 x11`
-
-
-include common.mk
