@@ -36,6 +36,9 @@ void GuiList::create(GuiWindow * wnd)
     gtk_container_set_border_width(GTK_CONTAINER(table), 2);
     gtk_viewport_set_shadow_type(GTK_VIEWPORT(gtk_bin_get_child((GtkBin* )scroll)), GTK_SHADOW_NONE);
 
+    //enable auto-scroll
+    auto ad = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scroll));
+    gtk_container_set_focus_vadjustment(GTK_CONTAINER(table), ad);
 }
 
 void GuiList::add(GuiItem *it)
@@ -90,7 +93,7 @@ bool GuiList::isScrollable()
     return scrollable;
 }
 
-void GuiList::setCurrent(GuiItem * it)
+void GuiList::setCurrent(GuiItem * it, bool grabFocus)
 {
     assert(it->list == this);
     setItemState(it, GTK_STATE_SELECTED, true);
@@ -98,6 +101,9 @@ void GuiList::setCurrent(GuiItem * it)
     {
         guiwnd->appList->refresh("");
     }
+    if (grabFocus && !gtk_widget_is_focus(it->buttonWidget()))
+        gtk_widget_grab_focus(it->buttonWidget());
+
 }
 
 GuiItem * GuiList::getSelectedItem()

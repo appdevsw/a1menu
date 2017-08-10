@@ -119,10 +119,11 @@ void Config::setDefaultConfig()
     newItem(c, "menu_sync_delay_ms", INT, "200", _("Synchronization delay [ms]"), "0:3000");
     newItem(c, "menu_label", CHR, "Menu", _("Menu label on the panel"), "", false);
     newItem(c, "icon_menu", CHR, "system-run", _("Menu icon on the panel"), "", false);
+    newItem(c, "transparency", INT, "0", _("Window transparency [%]"), "0:100", true);
     auto h = newItem(c, "hotkey", CHR, "", _("Hot key"), "hotkey");
     h->ord += 1;
     h = newItem(c, "button_clear_cache", CHR, "", _("Clear cache"));
-    h->buttonId=1;
+    h->buttonId = 1;
     h->ord += 2;
 
     auto cl = root;
@@ -134,7 +135,7 @@ void Config::setDefaultConfig()
 
     bool gtk3 = false;
 #ifdef GTK3
-    gtk3=true;
+    gtk3 = true;
 #endif
 
     newItem(c, "app_item_height", INT, "", _("Row height"), lovRowHeight);

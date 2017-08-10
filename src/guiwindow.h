@@ -52,6 +52,7 @@ private:
 
 
     GtkWidget * hpane = NULL;
+    GtkWidget * frame = NULL;
     GtkWidget * mainContainer = NULL;
     GtkWidget * mainChild = NULL;
     int xwinID();

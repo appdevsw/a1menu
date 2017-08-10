@@ -26,7 +26,7 @@ public:
     void add(GuiItem * it);
     GtkWidget * widget();
     void refresh(std::string filter);
-    void setCurrent(GuiItem * it);
+    void setCurrent(GuiItem * it,bool grabFocus=false);
     bool isApp();
     bool isCategory();
     void setItemState(GuiItem * it, int state, bool enable);

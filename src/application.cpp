@@ -27,7 +27,7 @@ using namespace std;
 #undef CFGI
 #undef CFGBOOL
 
-const char * Application::A1MENU_VERSION = "2.0.1";
+const char * Application::A1MENU_VERSION = "2.3.0";
 
 const char * Application::A1MENU_GTK = "a1menu-gtk";
 const char * Application::A1MENU_GTK_RUN = "a1menu-gtk.run";
@@ -123,7 +123,7 @@ bool Application::CFGBOOL(std::string key)
     return v == res.parYes;
 }
 
-void Application::kbdListenerCallback(const X11KeyData& kd)
+void Application::kbdListenerCallback(const X11KeySequence& kd)
 {
     auto td = new TimerRec();
     td->action = TOGGLE_SHOW;

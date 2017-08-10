@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <assert.h>
 
-//Code here is based on examples from linux manuals (http://man7.org/tlpi/code/online/book/inotify/demo_inotify.c.html)
+//This code is based on examples from linux manuals (http://man7.org/tlpi/code/online/book/inotify/demo_inotify.c.html)
 
 using namespace std;
 

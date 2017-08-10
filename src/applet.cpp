@@ -45,7 +45,7 @@ gboolean Applet::onButtonPress(GtkWidget *widget, GdkEventButton *event, Applet 
 gboolean Applet::onMouseInOut(GtkWidget *widget, GdkEventButton *event, Applet * appinst)
 {
     auto state = event->type == GDK_ENTER_NOTIFY ? GTK_STATE_SELECTED : GTK_STATE_NORMAL;
-    gtk_widget_set_state(appinst->container, state);
+    gtk_widget_set_state(appinst->frameMem, state);
     return FALSE;
 }
 
@@ -69,7 +69,7 @@ void Applet::setButton(const string& label, const string& iconPath)
         string txt = label;
         if (txt.empty() && iconPath == "")
             txt = _("Menu");
-        gtk_label_set_markup((GtkLabel*) appinst->label, txt.c_str());
+        gtk_label_set_markup((GtkLabel*) appinst->labelMem, txt.c_str());
         gtk_widget_show(appinst->hboxi);
     }
 }
@@ -95,20 +95,22 @@ void Applet::init()
     mate_panel_applet_set_background_widget(mateApplet, GTK_WIDGET(mateApplet));
     hbox = gtk_hbox_new(FALSE, 0);
     hboxi = gtk_hbox_new(FALSE, 0);
-    container = gtk_event_box_new();
+    frameMem = gtk_event_box_new();
+    labelMem = gtk_label_new("Menu");
 
-    g_signal_connect(G_OBJECT(container), "button-press-event", G_CALLBACK(onButtonPress), this);
-    g_signal_connect(G_OBJECT(container), "enter-notify-event", G_CALLBACK(onMouseInOut), this);
-    g_signal_connect(G_OBJECT(container), "leave-notify-event", G_CALLBACK(onMouseInOut), this);
+    gtk_container_add(GTK_CONTAINER(mateApplet), (GtkWidget*) frameMem);
+    gtk_container_add(GTK_CONTAINER(frameMem), hbox);
+    gtk_box_pack_start(GTK_BOX(hbox), hboxi, 0, 0, 2);
+    gtk_box_pack_start(GTK_BOX(hbox), labelMem, 0, 0, 2);
+
+
+    g_signal_connect(G_OBJECT(frameMem), "button-press-event", G_CALLBACK(onButtonPress), this);
+    g_signal_connect(G_OBJECT(frameMem), "enter-notify-event", G_CALLBACK(onMouseInOut), this);
+    g_signal_connect(G_OBJECT(frameMem), "leave-notify-event", G_CALLBACK(onMouseInOut), this);
     g_signal_connect(G_OBJECT(mateApplet), "destroy", G_CALLBACK(appletDestroy), this);
 
-    label = gtk_label_new("Menu");
-
-    gtk_container_add(GTK_CONTAINER(mateApplet), (GtkWidget*) container);
-    gtk_container_add(GTK_CONTAINER(container), hbox);
-    gtk_box_pack_start(GTK_BOX(hbox), hboxi, 0, 0, 2);
-    gtk_box_pack_start(GTK_BOX(hbox), label, 0, 0, 2);
     gtk_widget_show_all((GtkWidget*) mateApplet);
+
     lastInstance = this;
 
     if (vInstances.size() == 1)

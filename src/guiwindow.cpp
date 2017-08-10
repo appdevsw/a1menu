@@ -49,7 +49,7 @@ void GuiWindow::create()
     gtk_window_set_type_hint(GTK_WINDOW(wnd), GDK_WINDOW_TYPE_HINT_MENU); //disable maximizing
 
     //constant elements that are not removed during reloading (rest of children are created and removed in populate())
-    auto frame = gtk_frame_new(NULL);
+    frame = gtk_frame_new(NULL);
     gtk_container_add(GTK_CONTAINER(wnd), frame);
     gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_OUT);
 
@@ -62,7 +62,7 @@ void GuiWindow::create()
 
         GtkStyle *style = gtk_widget_get_style(wnd);
         auto c = style->bg[GTK_STATE_NORMAL];
-        string buf = sutl::format(" * {border-style: outset ;border-width: 1px; border-color: #%02x%02x%02x ;}", //
+        string buf = sutl::format(" * {border-style: outset ;border-width: 1px; border-color: #%02x%02x%02x;}", //
                 c.red >> 8, c.green >> 8, c.blue >> 8);
         auto prov = gtk_css_provider_new();
         gtk_css_provider_load_from_data(prov, buf.c_str(), -1, NULL);
@@ -146,16 +146,15 @@ void GuiWindow::populate(bool doShow)
     {
         auto w = gtk_bin_get_child((GtkBin*) catList->widget());
 #ifdef GTK3
-         auto wsrc=wnd;
-         auto context = gtk_widget_get_style_context((GtkWidget*) wsrc);
-         GdkRGBA c;
-         gtk_style_context_get_background_color(context, GTK_STATE_FLAG_NORMAL, &c);
-         double m = 0.95;
-         #define ccc(rgb) c. rgb = c. rgb * m
-         ccc(red);
-         ccc(green);
-         ccc(blue);
-         gtk_widget_override_background_color(w,GTK_STATE_FLAG_NORMAL,&c);
+        auto wsrc = wnd;
+        auto context = gtk_widget_get_style_context((GtkWidget*) wsrc);
+        GdkRGBA c;
+        gtk_style_context_get_background_color(context, GTK_STATE_FLAG_NORMAL, &c);
+        double m = 0.95;
+        c.blue *= m;
+        c.red *= m;
+        c.green *= m;
+        gtk_widget_override_background_color(w, GTK_STATE_FLAG_NORMAL, &c);
 #else
         GtkStyle *style = gtk_rc_get_style(w);
         auto c = style->bg[GTK_STATE_NORMAL];
@@ -297,7 +296,6 @@ gboolean GuiWindow::onShow(GtkWidget *widget, void*data)
     GuiWindow * wnd = (GuiWindow*) data;
     wnd->searchBox->setText("");
     wnd->goToDefaultCategory();
-    gtk_widget_grab_focus((GtkWidget*) wnd->searchBox->getEntry());
     return FALSE;
 }
 
@@ -311,6 +309,16 @@ void GuiWindow::show(bool enable)
         gtk_window_set_skip_taskbar_hint(GTK_WINDOW(wnd), TRUE);
         app->processEvents();
         X11Util::setForegroundWindow(xwinID());
+
+        //transparecny after show()
+        if (gtk_widget_is_composited(wnd))
+        {
+            double opacity = 1.0 - ((double) CFGI("transparency")) / 100.0;
+#ifdef GTK3
+            gtk_widget_set_opacity(wnd, opacity);
+#endif
+            gtk_window_set_opacity((GtkWindow*) wnd, opacity);
+        }
 
     } else
         gtk_widget_hide(widget());
@@ -502,8 +510,7 @@ void GuiWindow::goToDefaultCategory()
     if (idxDefault >= 0)
     {
         auto it = (*catList->items())[idxDefault];
-        gtk_widget_grab_focus(it->buttonWidget());
-        catList->setCurrent(it);
+        catList->setCurrent(it, true);
     }
 
 }

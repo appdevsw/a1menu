@@ -14,125 +14,57 @@
 
 using namespace std;
 
-std::map<int, string> X11KeyData::vKeyNames;
-std::map<int, string> X11KeyData::vModNames;
-std::map<int, int> X11KeyData::vModBits;
+Display * X11KeySequence::kdisplay = NULL;
+set<int> X11KeySequence::vModifiers;
 
-void X11KeyData::init()
+void X11KeySequence::init()
 {
-    if (!vKeyNames.empty())
-        return;
-    //XSetErrorHandler(errorHandler);
+    if (kdisplay == NULL)
+        kdisplay = XOpenDisplay(NULL); //opened forever
 
-    Display *display = XOpenDisplay(NULL);
-
-    //modifiers
-
-    /*
-     Mask        | Value | Key
-     ------------+-------+------------
-     ShiftMask   |     1 | Shift
-     LockMask    |     2 | Caps Lock
-     ControlMask |     4 | Ctrl
-     Mod1Mask    |     8 | Alt
-     Mod2Mask    |    16 | Num Lock
-     Mod3Mask    |    32 | Scroll Lock
-     Mod4Mask    |    64 | Windows
-     Mod5Mask    |   128 | ???
-     */
-
-#define insmod(keysym) vModNames[XKeysymToKeycode(display,keysym)]=XKeysymToString(keysym)
-    insmod(XK_Caps_Lock);
-    insmod(XK_Shift_L);
-    insmod(XK_Shift_R);
-    insmod(XK_Control_L);
-    insmod(XK_Control_R);
-    insmod(XK_Alt_L);
-    insmod(XK_Alt_R);
-    insmod(XK_Super_L);
-    insmod(XK_Super_R);
-
-#define insmodm(keysym,bit) vModBits[XKeysymToKeycode(display,keysym)]=bit
-
-    insmodm(XK_Caps_Lock, 2);
-    insmodm(XK_Shift_L, 1);
-    insmodm(XK_Shift_R, 1);
-    insmodm(XK_Control_L, 4);
-    insmodm(XK_Control_R, 4);
-    insmodm(XK_Alt_L, 8);
-    insmodm(XK_Alt_R, 8);
-    insmodm(XK_Super_L, 64);
-    insmodm(XK_Super_R, 64);
-
-    /* find masks programatically, but what about right modifiers?
-     auto mm = XGetModifierMapping(display);
-     for (int i = 0; i < 8; i++)
-     {
-     auto kcode=mm->modifiermap[mm->max_keypermod * i];
-     auto mask= 1 << i;
-     printf("\nmod %i %i %i ", i, kcode,mask);
-     }*/
-
-    for (int xkeycode = 0; xkeycode < 256; xkeycode++)
+    if (vModifiers.empty())
     {
-        auto keysym = XkbKeycodeToKeysym(display, xkeycode, 0, 0);
-        if (keysym != NoSymbol)
-        {
-            char * kname = XKeysymToString(keysym);
-            if (vModNames.find(xkeycode) == vModNames.end())
-            {
-                if (kname != NULL && kname[0])
-                {
-
-                    //printf("\ninit %i %lu %s", xkeycode, keysym, kname);
-                    vKeyNames[xkeycode] = string(kname);
-                }
-            } else
-            {
-                //printf("\ninit %i %lu %s !modifier", xkeycode, keysym, kname);
-
-            }
-        }
-
+        vModifiers.insert(XK_Caps_Lock);
+        vModifiers.insert(XK_Shift_L);
+        vModifiers.insert(XK_Shift_R);
+        vModifiers.insert(XK_Control_L);
+        vModifiers.insert(XK_Control_R);
+        vModifiers.insert(XK_Alt_L);
+        vModifiers.insert(XK_Alt_R);
+        vModifiers.insert(XK_Super_L);
+        vModifiers.insert(XK_Super_R);
     }
-
-    XCloseDisplay(display);
 }
 
-string X11KeyData::toKeyName(int xkeycode)
+string X11KeySequence::toKeyName(int xkeycode)
 {
     init();
-    auto it = vKeyNames.find(xkeycode);
-    if (it != vKeyNames.end())
-        return it->second;
-
-    it = vModNames.find(xkeycode);
-    if (it != vModNames.end())
-        return it->second;
-
-    return "key" + sutl::itoa(xkeycode);
+    auto keysym = XkbKeycodeToKeysym(kdisplay, xkeycode, 0, 0);
+    if (keysym == NoSymbol)
+        return sutl::format("Unknown_Key_%i", xkeycode);
+    return XKeysymToString(keysym);
 }
 
-int X11KeyData::toKeyCode(const string& keyname)
+int X11KeySequence::toKeyCode(const string& keyname)
 {
     init();
-    auto arr = { &vKeyNames, &vModNames };
-    for (auto m : arr)
-        for (auto e : *m)
-        {
-            if (e.second == keyname)
-                return e.first;
-        }
-    return -1;
+    auto keysym = XStringToKeysym(keyname.c_str());
+    if (keysym == NoSymbol)
+        return -1;
+    auto xkeycode = XKeysymToKeycode(kdisplay, keysym);
+    if (xkeycode == 0)
+        return -1;
+    return xkeycode;
 }
 
-bool X11KeyData::isModifier(int xkeycode)
+bool X11KeySequence::isModifier(int xkeycode)
 {
     init();
-    return vModNames.find(xkeycode) != vModNames.end();
+    auto keysym = XkbKeycodeToKeysym(kdisplay, xkeycode, 0, 0);
+    return vModifiers.find(keysym) != vModifiers.end();
 }
 
-void X11KeyData::createFromString(const string& seq)
+void X11KeySequence::createFromString(const string& seq)
 {
     codes.clear();
     vector<string> v;
@@ -143,7 +75,7 @@ void X11KeyData::createFromString(const string& seq)
     }
 }
 
-string X11KeyData::toString()
+string X11KeySequence::toString()
 {
     string strkeys;
     string strmods;
@@ -163,8 +95,6 @@ string X11KeyData::toString()
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-std::map<Display *, int> X11KeyListener::vErrors;
-
 X11KeyListener::X11KeyListener()
 {
 }
@@ -176,12 +106,9 @@ X11KeyListener::~X11KeyListener()
 
 void X11KeyListener::setCallback(callbackfun callback)
 {
+    mutexChangeKey.lock();
     this->callback = callback;
-}
-
-void X11KeyListener::runner(X11KeyListener * kl)
-{
-    kl->run();
+    mutexChangeKey.unlock();
 }
 
 int X11KeyListener::start()
@@ -190,7 +117,7 @@ int X11KeyListener::start()
     if (started)
         return -1;
     started = 0;
-    thr = thread(runner, this);
+    thr = thread(&X11KeyListener::run, this);
     while (!started)
         usleep(1000);
     return 0;
@@ -214,9 +141,11 @@ void X11KeyListener::suspend(bool par)
 void X11KeyListener::setKey(const string& keyseq)
 {
     printf("\nset hotkey to <%s>", keyseq.c_str());
-    X11KeyData kd;
+    X11KeySequence kd;
     kd.createFromString(keyseq);
+    mutexChangeKey.lock();
     currentKey = kd;
+    mutexChangeKey.unlock();
     if (keyseq.empty())
     {
         stop();
@@ -224,13 +153,6 @@ void X11KeyListener::setKey(const string& keyseq)
     }
     suspended = false;
     start();
-}
-
-int X11KeyListener::errorHandler(Display* display, XErrorEvent *event)
-{
-    vErrors[display] = 1;
-    printf("\nX11KeyListener error");
-    return 1;
 }
 
 bool X11KeyListener::checkXI2()
@@ -255,96 +177,111 @@ bool X11KeyListener::checkXI2()
 void X11KeyListener::run()
 {
     started = 1;
-    printf("\nHotKey listener started with key: <%s>", currentKey.toString().c_str());
-    //XSetErrorHandler(errorHandler);
 
     if (!checkXI2())
     {
-        printf("\nHotKey listener error: XI2 not available");
+        printf("\nHotKey listener error: XI2 is not available");
         started = 0;
         return;
     }
 
+    printf("\nHotKey listener started with key: <%s>", currentKey.toString().c_str());
+
+    Display * display = XOpenDisplay(NULL);
+    int devcount;
+    XDeviceInfo *devices = XListInputDevices(display, &devcount);
+    int imaskmax = 64;
+    XIEventMask mask[imaskmax] { 0 };
+    Window win = DefaultRootWindow(display);
+
+    int idx = 0;
+    for (int i = 0; i < devcount; i++)
     {
-        Display * display = XOpenDisplay(NULL);
-        int devcount;
-        XDeviceInfo *devices = XListInputDevices(display, &devcount);
-        int imaskmax = 64;
-        XIEventMask mask[imaskmax] { 0 };
-        Window win = DefaultRootWindow(display);
+        assert(idx < imaskmax);
+        string devname = sutl::lower(devices[i].name);
+        if (!sutl::contains(devname, "keyboard"))
+            continue;
+        //printf("\nSelect input device: %3lu %s", devices[i].id, devices[i].name);
+        XIEventMask *m;
+        m = &mask[idx];
+        m->deviceid = devices[i].id;
+        m->mask_len = XIMaskLen(XI_LASTEVENT);
+        m->mask = (unsigned char *) calloc(m->mask_len, 1); //0-memory
+        XISetMask(m->mask, XI_KeyPress);
+        XISetMask(m->mask, XI_RawKeyPress);
+        XISetMask(m->mask, XI_KeyRelease);
+        XISetMask(m->mask, XI_RawKeyRelease);
+        idx++;
+    }
+    assert(idx > 0);
 
-        int idx = 0;
-        for (int i = 0; i < devcount; i++)
+    XISelectEvents(display, win, &mask[0], 2);
+    XSync(display, False);
+
+    for (int i = 0; i < idx; i++)
+    {
+        free(mask[i].mask);
+    }
+
+    auto fdx = ConnectionNumber(display);
+
+    set<int> vStateDelta;
+    while (!doStop)
+    {
+
+        if (!XPending(display))
         {
-            assert(idx < imaskmax);
-            string devname = sutl::lower(devices[i].name);
-            if (!sutl::contains(devname, "keyboard"))
-                continue;
-            //printf("\nSelect input device: %3lu %s", devices[i].id, devices[i].name);
-            XIEventMask *m;
-            m = &mask[idx];
-            m->deviceid = devices[i].id;
-            m->mask_len = XIMaskLen(XI_LASTEVENT);
-            m->mask = (unsigned char *) calloc(m->mask_len, 1); //0-memory
-            XISetMask(m->mask, XI_KeyPress);
-            XISetMask(m->mask, XI_RawKeyPress);
-            idx++;
+            socketWaiter.add(fdx);
+            auto r = socketWaiter.wait(10000);
+            if (r < 0)
+                break;
         }
-        assert(idx > 0);
 
-        XISelectEvents(display, win, &mask[0], 2);
-        XSync(display, False);
+        if (doStop)
+            break;
 
-        for (int i = 0; i < idx; i++)
+        while (XPending(display))
         {
-            free(mask[i].mask);
-        }
-
-        auto fdx = ConnectionNumber(display);
-
-        while (!doStop)
-        {
-
-            if (!XPending(display))
-            {
-                socketWaiter.add(fdx);
-                auto r = socketWaiter.wait(10000);
-                //printf("\nselect %i", r);
-                if (r < 0)
-                    break;
-            }
-
-            if (!XPending(display))
-                continue;
 
             XEvent ev;
-            //printf("\nevent pre");
+            XGenericEventCookie *cookie = &ev.xcookie;
             XNextEvent(display, (XEvent*) &ev);
-
-            if (doStop)
-                break;
-            //printf("\nevent %i", ev.type);
-
-            if (suspended)
+            if (!XGetEventData(display, cookie))
                 continue;
+            XIDeviceEvent *evd = (XIDeviceEvent *) cookie->data;
 
-            auto currState = getKeyboardState(display);
-            if (callback != NULL && currentKey.codes == currState.codes)
+            //printf("\nev %i", evd->evtype);
+
+            if (evd->evtype == XI_RawKeyRelease || evd->evtype == XI_KeyRelease)
+                vStateDelta.erase(evd->detail);
+            else if (evd->evtype == XI_RawKeyPress || evd->evtype == XI_KeyPress)
             {
-                printf("\nHotKey <%s> pressed.", currState.toString().c_str());
-                callback(currState);
-            }
+                vStateDelta.insert(evd->detail);
 
+                if (suspended)
+                    continue;
+
+                mutexChangeKey.lock();
+                auto cmp = callback != NULL && currentKey.codes == vStateDelta;
+                mutexChangeKey.unlock();
+
+                if (cmp)
+                {
+                    printf("\nHotKey <%s> pressed.", currentKey.toString().c_str());
+                    callback(currentKey);
+                }
+            }
         }
-        XCloseDisplay(display);
-        started = 0;
-        printf("\nHotKey listener stopped.");
     }
+    XCloseDisplay(display);
+    started = 0;
+    printf("\nHotKey listener stopped.");
+
 }
 
-X11KeyData X11KeyListener::getKeyboardState(Display * pdisplay)
+X11KeySequence X11KeyListener::getKeyboardState(Display * pdisplay)
 {
-    X11KeyData kd;
+    X11KeySequence kd;
     kbdstate keys;
     Display *display = pdisplay == NULL ? XOpenDisplay(NULL) : pdisplay;
     XQueryKeymap(display, keys);

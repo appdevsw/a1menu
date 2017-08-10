@@ -20,7 +20,7 @@
 #include <mutex>
 #include <glib/gi18n.h>
 
-class X11KeyData;
+class X11KeySequence;
 class GuiWindow;
 class Application;
 class Config;
@@ -137,7 +137,7 @@ public:
     bool isBlocked();
     bool isReloading(string desc);
     GuiWindow * currentWindow();
-    static void kbdListenerCallback(const X11KeyData& kd);
+    static void kbdListenerCallback(const X11KeySequence& kd);
     void runMenuProcess(GuiItem * it, string command = "");
     static void processEvents(int durationMs = 50);
     int getTimerToken();

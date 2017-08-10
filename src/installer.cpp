@@ -12,7 +12,7 @@ using namespace std;
 #define delim string("*")
 #define replacefirst(str,from,to)    sutl::replace(delim + str, delim + from, to)
 #define replacelast(str,from,to)     sutl::replace(str + delim, from + delim, to)
-#define dbg if(0) printf
+#define dbg if(1) printf
 #define throwstr(s) throw string(s)
 
 #define CONSOLE_RED     "\033[01;31m"
@@ -30,7 +30,7 @@ Installer::Installer()
     architecture = "x86_64";
     gtkVersionSym = "gtk2";
 #ifdef GTK3
-    gtkVersionSym="gtk3";
+    gtkVersionSym = "gtk3";
 #endif
 }
 
@@ -50,39 +50,43 @@ void Installer::getEntries(std::vector<Entry> & ventries)
         dbg("\nsearching for translation files (*.po) in the current directory %s", currentWorkingDir.c_str());
         vector<string> vfiles;
         t.getDirectory(currentWorkingDir, &vfiles);
+
+        string dirTmp = (string) "/tmp/" + Application::A1MENU_GTK + "-translations/";
+
+        cmd = "rm -rf " + dirTmp;
+        syscmd(cmd);
+        if (t.dirExists(dirTmp))
+            throwstr(" Remove directory error: " + dirTmp);
+
+        syscmd("mkdir -p " + dirTmp);
+
         for (auto f : vfiles)
         {
             string fname = f;
             if (sutl::startsWith(fname, currentWorkingDir))
                 fname = replacefirst(fname, currentWorkingDir, "./");
-            if (sutl::endsWith(fname, (string) Application::A1MENU_GTK + ".po"))
+            if (sutl::endsWith(fname, ".po"))
             {
-                string mofile = replacelast(fname, ".po", ".mo");
-                string mofilefull = replacelast(f, ".po", ".mo");
+                string shortName = t.shortName(fname);
+                string lang = sutl::replace(shortName, ".po", "");
+                dbg("\n %s %s", shortName.c_str(), lang.c_str());
 
-                auto vspl = sutl::split(mofilefull, '/');
-                auto last = vspl.size() - 1;
-                if (last < 2 || vspl[last - 1] != "LC_MESSAGES")
-                {
-                    continue;
-                }
-                string pkgmofile = "/" + vspl[last - 2] + "/" + vspl[last - 1] + "/" + vspl[last];
+                string pkgmofile = "/" + lang + "/LC_MESSAGES/" + Application::A1MENU_GTK + ".mo";
+                string mofile = dirTmp + shortName + ".mo";
 
+                cmd = "msgfmt --output-file=" + mofile + " " + fname;
+                syscmd(cmd);
                 if (!t.fileExists(mofile))
+                    throwstr(" translation failed.");
+                else
                 {
-                    cmd = "msgfmt --output-file=" + mofile + " " + fname;
-                    syscmd(cmd);
-                    if (!t.fileExists(mofile))
-                        throwstr(" translation failed.");
-                    else
-                    {
 
-                        dbg("\n creating %s", mofile.c_str());
+                    dbg("\n creating %s", mofile.c_str());
 
-                    }
                 }
+
                 e = Entry();
-                e.srcPath = mofilefull;
+                e.srcPath = mofile;
                 e.fileName = string(APP_TEXT_DOMAIN) + pkgmofile;
                 ventries.push_back(e);
                 trcount++;
@@ -108,7 +112,7 @@ void Installer::getEntries(std::vector<Entry> & ventries)
     e.content += "\nName=$A1G"
             "\nDescription=Searchable menu for MATE Desktop"
             "\nIcon=terminal";
-    e.fileName = (string) "/usr/share/mate-panel/applets/org.mate.applets." + Application::A1MENU_APPLET_SCHEMA + ".mate-panel-applet";
+    e.fileName = (string) "/usr/share/mate-panel/applets/org.mate.applets." + Application::A1MENU_GTK + ".mate-panel-applet";
     ventries.push_back(e);
 
     e = Entry();
@@ -118,18 +122,20 @@ void Installer::getEntries(std::vector<Entry> & ventries)
     e.fileName = (string) "/usr/share/dbus-1/services/org.mate.panel.applet." + Application::A1MENU_APPLET_FACTORY + ".service";
     ventries.push_back(e);
 
-    e = Entry();
-    e.content = "<schemalist gettext-domain=`mate-applets`>";
-    e.content += (string) "\n<schema id=`" + Application::A1MENU_APPLET_SCHEMA + "`>"
-            "\n<key name=`hello` type=`s`>"
-            "\n <default>''</default>"
-            "\n <summary>hello</summary>"
-            "\n <description>hello</description>"
-            "\n</key>"
-            "\n</schema>"
-            "\n</schemalist>";
-    e.fileName = (string) "/usr/share/glib-2.0/schemas/" + Application::A1MENU_APPLET_SCHEMA + ".gschema.xml";
-    ventries.push_back(e);
+    /*
+     e = Entry();
+     e.content = "<schemalist gettext-domain=`mate-applets`>";
+     e.content += (string) "\n<schema id=`" + Application::A1MENU_APPLET_SCHEMA + "`>"
+     "\n<key name=`hello` type=`s`>"
+     "\n <default>''</default>"
+     "\n <summary>hello</summary>"
+     "\n <description>hello</description>"
+     "\n</key>"
+     "\n</schema>"
+     "\n</schemalist>";
+     e.fileName = (string) "/usr/share/glib-2.0/schemas/" + Application::A1MENU_APPLET_SCHEMA + ".gschema.xml";
+     ventries.push_back(e);
+     */
 
     e = Entry();
     e.fileName = exePath;

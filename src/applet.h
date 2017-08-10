@@ -24,8 +24,8 @@ private:
     static Applet * lastInstance;
 
     MatePanelApplet * mateApplet = NULL;
-    GtkWidget *label = NULL;
-    GtkWidget *container = NULL;
+    GtkWidget *labelMem = NULL;
+    GtkWidget *frameMem = NULL;
     GtkWidget *hbox = NULL;
     GtkWidget *hboxi = NULL;
     GtkWidget *icon = NULL;

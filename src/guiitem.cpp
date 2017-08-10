@@ -134,23 +134,17 @@ void GuiItem::create(GuiWindow * wnd)
 
 #ifdef GTK3
     {
+        string style = "";
         if (!vpadding.empty() && vpadding != res.labDefault)
         {
-            static map<string, GtkCssProvider *> provmap;
-            if (provmap.find(vpadding) == provmap.end())
-            {
-                auto prov = gtk_css_provider_new();
-                string st = " * {padding-top: ?px; padding-bottom: ?px;border-width: 1px;} ";
-                st = sutl::replace(st, "?", vpadding);
-                gtk_css_provider_load_from_data(prov, st.c_str(), -1, NULL);
-                provmap[vpadding] = prov;
-            }
-            auto prov = provmap[vpadding];
-            assert(prov!=NULL);
-            auto w = button;
-            auto context = gtk_widget_get_style_context((GtkWidget*) w);
-            gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(prov), GTK_STYLE_PROVIDER_PRIORITY_USER);
+            style = "padding-top: " + vpadding + "px; padding-bottom: " + vpadding + "px;border-width: 1px; ";
         }
+        style = " * {" + style + "transition: none;}";
+        auto prov = gtk_css_provider_new();
+        gtk_css_provider_load_from_data(prov, style.c_str(), -1, NULL);
+        auto context = gtk_widget_get_style_context((GtkWidget*) button);
+        gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(prov), GTK_STYLE_PROVIDER_PRIORITY_USER);
+        g_object_unref(prov);
     }
 #endif
 
@@ -224,10 +218,7 @@ gboolean GuiItem::onTimer(gpointer data)
     {
         if (td->count == td->item->list->changeCounter)
         {
-            td->item->list->setCurrent(td->item);
-            if (!gtk_widget_is_focus(td->item->buttonWidget()))
-            gtk_widget_grab_focus(td->item->buttonWidget());
-
+            td->item->list->setCurrent(td->item,true);
         }
     }
     if (td->type == td->TOOLTIP && td->item->mouseIn)
@@ -288,23 +279,33 @@ gboolean GuiItem::onButton(GtkWidget *widget, GdkEventButton *e, void *data)
         auto ke = (GdkEventKey*) e;
         auto key = ke->keyval;
         run = (key == GDK_Return || key == GDK_space);
-        if (!run && key != GDK_Up && key != GDK_Down)
+        if (!run )
         {
-            auto ent = it->guiwnd->searchBox->getEntry();
-            gtk_widget_grab_focus((GtkWidget*) ent);
-            if (key > 32 && key < 128)
+            if(key > 32 && key < 128)
             {
-                string text = string(gtk_entry_get_text((GtkEntry*) ent));
+                auto ent = it->guiwnd->searchBox->getEntry();
+                gtk_widget_grab_focus((GtkWidget*)ent);
+                string text = string(gtk_entry_get_text(ent));
                 text += (char) key;
-                gtk_entry_set_text((GtkEntry*) ent, text.c_str());
+                gtk_entry_set_text( ent, text.c_str());
+                gtk_editable_set_position((GtkEditable*) ent, 1000);
             }
-            gtk_editable_set_position((GtkEditable*) ent, 1000);
+            if (key == GDK_Right || key == GDK_Left)
+            {
+                auto otherList=it->isApp()?it->guiwnd->catList:it->guiwnd->appList;
+                auto next=otherList->getSelectedItem();
+                if(next!=NULL)
+                {
+                    gtk_widget_grab_focus(next->buttonWidget());
+                }
+            }
+
         }
     }
     if (run)
     {
         app->runMenuProcess(it);
-        ret = true;
+        //ret = true;
     }
     return ret;
 }
@@ -325,7 +326,7 @@ gboolean GuiItem::onMouseEnter(GtkWidget *widget, GdkEventButton *event, GtkWidg
         g_timeout_add(CFGI("menu_sync_delay_ms"), onTimer, td);
     } else
     {
-        it->list->setCurrent(it);
+        it->list->setCurrent(it,true);
     }
 
     //Tooltips improvement. Longer delay and disaperence on MouseLeave
@@ -349,13 +350,12 @@ gboolean GuiItem::onMouseLeave(GtkWidget *widget, GdkEventButton *event, GtkWidg
     it->list->changeCounter++;
     it->list->setItemState(it, GTK_STATE_PRELIGHT, false);
     gtk_widget_set_tooltip_markup(it->button, NULL);
-    return TRUE;
+    return FALSE;
 }
 
 gboolean GuiItem::onFocus(GtkWidget *widget, GdkEvent *event, void*data)
 {
     CHECK_IS_HANDLER_BLOCKED();
-
     GuiItem * it = (GuiItem*) data;
     it->list->setCurrent(it);
     return FALSE;
