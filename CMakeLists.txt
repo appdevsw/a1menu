@@ -8,10 +8,10 @@ project (a1menu)
 #extracting a version from the source code
 
 file(STRINGS ${CMAKE_CURRENT_BINARY_DIR}/src/application.cpp v)
-string(REPLACE " " "" v input ${v})
-string(REPLACE "\"" "~" v input ${v})
-string(REPLACE "." "~" v input ${v})
-string(REPLACE "~" ";" v input ${v})
+string(REPLACE " " ""   v ${v})
+string(REPLACE "\"" "~" v ${v})
+string(REPLACE "." "~"  v ${v})
+string(REPLACE "~" ";"  v ${v})
 
 foreach(s in ${v})
    string(FIND "${s}" ":A1MENU_VERSION=" pos)
@@ -74,6 +74,14 @@ endif()
 pkg_check_modules(X11 REQUIRED x11)
 pkg_check_modules(MATE REQUIRED libmatepanelapplet-4.0)
 
+find_program(MSGEXE msgfmt)
+if(${MSGEXE} STREQUAL "MSGEXE-NOTFOUND")
+    message(FATAL_ERROR "Translation tool msgfmt not found!")
+endif()
+
+
+
+
 include_directories(${LIBXML2_INCLUDE_DIR})
 include_directories(${GTK_INCLUDE_DIRS})
 include_directories(${GDK_INCLUDE_DIRS})
@@ -129,7 +137,7 @@ endfunction()
 
 
     
-find_program(MSGEXE msgfmt)
+
 
 FILE(GLOB POLIST src/po/*.po )
 
@@ -201,6 +209,10 @@ SET(CPACK_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 SET(CPACK_DEB_DEFAULT_FILE_PERMISSIONS ${DEFAULT_PERMISSIONS})
 SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
+#set(CPACK_SOURCE_GENERATOR "RPM")
+#SET(CPACK_SOURCE_RPM ON)
+#set(CPACK_RPM_PACKAGE_SOURCES "ON")
+
 IGNORE_RPM_PATH( ${DIR_INST_FACTORY} )
 IGNORE_RPM_PATH( ${DIR_INST_SERVICES} )
 
@@ -208,3 +220,36 @@ SET(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION ${F_IGNORE_RPM})
 
 
 INCLUDE(CPack)
+
+
+#generate source RPM
+
+option(srpm "srpm" OFF)
+message(STATUS "srpm option: " ${srpm})
+if(srpm)
+   set(buildroot /tmp/a1menu-srpm)
+   execute_process ( COMMAND rm -r ${buildroot})
+   file(MAKE_DIRECTORY ${buildroot}/SPECS)
+   file(MAKE_DIRECTORY ${buildroot}/SOURCES)
+   set(srctmp ${buildroot}/work/a1menu-${verstr})
+   file(MAKE_DIRECTORY ${srctmp})
+   
+   #preparing spec file
+   file(READ ${CMAKE_CURRENT_BINARY_DIR}/src/install/a1menu.spec vspec)
+   string(REPLACE "versionundefined" ${verstr} vspec ${vspec})
+   file(WRITE ${buildroot}/SPECS/a1menu.spec ${vspec})
+   
+   
+   #file(COPY ${CMAKE_CURRENT_BINARY_DIR}/src/install/a1menu.spec DESTINATION ${buildroot}/SPECS)
+   
+   execute_process (COMMAND cp -r ${CMAKE_CURRENT_BINARY_DIR}/src ${srctmp})
+   execute_process (COMMAND cp -r ${CMAKE_CURRENT_BINARY_DIR}/CMakeLists.txt ${srctmp})
+   
+   set(xcmd "tar  -czhf ${buildroot}/SOURCES/a1menu-${verstr}.tar.gz -C ${buildroot}/work ./a1menu-${verstr}/")
+   message(STATUS ${xcmd})
+   execute_process (COMMAND bash -c "${xcmd}")
+			     
+   execute_process ( COMMAND rpmbuild 
+			     --define "_topdir ${buildroot}" 
+			     -ba ${buildroot}/SPECS/a1menu.spec)
+endif()
